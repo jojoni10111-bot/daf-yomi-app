@@ -31,7 +31,6 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // רשימת המסכתות כפי שמוגדרות ב-Sefaria API
         const TRACTATES = [
             { he: 'ברכות', en: 'Berakhot' }, { he: 'שבת', en: 'Shabbat' }, { he: 'עירובין', en: 'Eruvin' },
             { he: 'פסחים', en: 'Pesachim' }, { he: 'שקלים', en: 'Shekalim' }, { he: 'יומא', en: 'Yoma' },
@@ -49,30 +48,36 @@
         ];
 
         function DafYomiApp() {
-            // מצב מערכת: דף יומי או לימוד חופשי
-            const [studyMode, setStudyMode] = useState('daily'); // 'daily' or 'custom'
+            // מתג ראשי: גמרא או תניא
+            const [masterMode, setMasterMode] = useState('daf_yomi'); 
+            const [studyMode, setStudyMode] = useState('daily'); 
             
-            // סטייטים של לימוד חופשי
             const [customTractate, setCustomTractate] = useState(TRACTATES[0].en);
             const [customDaf, setCustomDaf] = useState(2);
             const [customAmud, setCustomAmud] = useState('a');
 
-            // סטייטים של הדף היומי
             const [dateOffset, setDateOffset] = useState(0); 
-            const [dafInfo, setDafInfo] = useState({ he: 'טוען מסכת ודף...', en: '', ref: '' });
             const [dateInfo, setDateInfo] = useState({ he: '', day: '', greg: '' });
-            const [isLearned, setIsLearned] = useState(false);
-            const [streak, setStreak] = useState(0);
             const [isLoading, setIsLoading] = useState(true);
             
-            // סטייטים של בית המדרש (הטקסט הפתוח)
+            // נתוני גמרא
+            const [dafInfo, setDafInfo] = useState({ he: 'טוען מסכת...', en: '', ref: '' });
+            const [isLearned, setIsLearned] = useState(false);
+            const [streak, setStreak] = useState(0);
+            const [learningHistory, setLearningHistory] = useState([]);
+
+            // נתוני תניא
+            const [tanyaInfo, setTanyaInfo] = useState({ he: 'טוען תניא...', ref: '' });
+            const [isTanyaLearned, setIsTanyaLearned] = useState(false);
+            const [tanyaStreak, setTanyaStreak] = useState(0);
+            const [tanyaHistory, setTanyaHistory] = useState([]);
+            
             const [showText, setShowText] = useState(false);
             const [activeTab, setActiveTab] = useState('gemara');
-            const [textContents, setTextContents] = useState({ gemara: [], rashi: [], tosafot: [], explanation: [] });
+            const [textContents, setTextContents] = useState({ gemara: [], explanation: [], rashi: [], tosafot: [], tanya_original: [], tanya_explanation: [] });
             const [isTextLoading, setIsTextLoading] = useState(false);
-            const [currentActiveRef, setCurrentActiveRef] = useState(''); // שומר את הרפרנס הפעיל כרגע בחלון הקריאה
+            const [currentActiveRef, setCurrentActiveRef] = useState('');
 
-            const [learningHistory, setLearningHistory] = useState([]);
             const [showHistoryModal, setShowHistoryModal] = useState(false);
 
             useEffect(() => {
@@ -89,15 +94,15 @@
                         const sefariaResponse = await fetch(`https://www.sefaria.org/api/calendars?year=${year}&month=${month}&day=${day}`);
                         const sefariaData = await sefariaResponse.json();
                         
+                        // שליפת דף יומי
                         const dafItem = sefariaData.calendar_items.find(item => item.title.en === "Daf Yomi");
-                        if (dafItem) {
-                            setDafInfo({ 
-                                he: dafItem.displayValue.he, 
-                                en: dafItem.title.en,
-                                ref: dafItem.url
-                            });
-                        }
+                        if (dafItem) setDafInfo({ he: dafItem.displayValue.he, en: dafItem.title.en, ref: dafItem.url });
 
+                        // שליפת תניא יומי
+                        const tanyaItem = sefariaData.calendar_items.find(item => item.title.en === "Tanya Yomi");
+                        if (tanyaItem) setTanyaInfo({ he: `תניא - ${tanyaItem.displayValue.he}`, ref: tanyaItem.url });
+
+                        // תאריך עברי אותנטי
                         const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                         const hebcalResponse = await fetch(`https://www.hebcal.com/converter?cfg=json&date=${dateString}&g2h=1&strict=1`);
                         const hebcalData = await hebcalResponse.json();
@@ -105,35 +110,50 @@
                         const cleanHebrewDate = hebcalData.hebrew.replace(/[\u0591-\u05C7]/g, "");
                         const formattedGregDate = targetDate.toLocaleDateString('he-IL');
                         const daysHe = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-                        const dayNameStr = `יום ${daysHe[targetDate.getDay()]}`;
+                        
+                        setDateInfo({ he: cleanHebrewDate, day: `יום ${daysHe[targetDate.getDay()]}`, greg: formattedGregDate });
 
-                        setDateInfo({ he: cleanHebrewDate, day: dayNameStr, greg: formattedGregDate });
-
-                        const savedHistory = JSON.parse(localStorage.getItem('daf_history') || '[]');
-                        setLearningHistory(savedHistory);
-
+                        // היסטוריה וסטטוס גמרא
+                        setLearningHistory(JSON.parse(localStorage.getItem('daf_history') || '[]'));
                         const savedState = localStorage.getItem(`daf_learned_${formattedGregDate}`);
                         setIsLearned(savedState === 'true');
 
-                        if (dateOffset === 0) {
-                            const savedStreak = parseInt(localStorage.getItem('daf_streak') || '0', 10);
-                            const lastLearnedDateStr = localStorage.getItem('daf_last_learned_date');
-                            let currentStreak = savedStreak;
+                        // היסטוריה וסטטוס תניא
+                        setTanyaHistory(JSON.parse(localStorage.getItem('tanya_history') || '[]'));
+                        const savedTanyaState = localStorage.getItem(`tanya_learned_${formattedGregDate}`);
+                        setIsTanyaLearned(savedTanyaState === 'true');
 
-                            if (lastLearnedDateStr) {
-                                const today = new Date();
-                                const lastDate = new Date(lastLearnedDateStr);
-                                const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                        // טיפול ברצף (Streak) לשניהם
+                        if (dateOffset === 0) {
+                            const today = new Date();
+                            const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                            
+                            // גמרא
+                            let currentStreak = parseInt(localStorage.getItem('daf_streak') || '0', 10);
+                            const lastDafStr = localStorage.getItem('daf_last_learned_date');
+                            if (lastDafStr) {
+                                const lastDate = new Date(lastDafStr);
                                 const lastDateMidnight = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
-                                const diffDays = Math.ceil(Math.abs(todayMidnight - lastDateMidnight) / (1000 * 60 * 60 * 24));
-                                if (diffDays > 1 && savedState !== 'true') {
-                                    currentStreak = 0;
-                                    localStorage.setItem('daf_streak', '0');
+                                if (Math.ceil(Math.abs(todayMidnight - lastDateMidnight) / 86400000) > 1 && savedState !== 'true') {
+                                    currentStreak = 0; localStorage.setItem('daf_streak', '0');
                                 }
                             }
                             setStreak(currentStreak);
+
+                            // תניא
+                            let currentTanyaStreak = parseInt(localStorage.getItem('tanya_streak') || '0', 10);
+                            const lastTanyaStr = localStorage.getItem('tanya_last_learned_date');
+                            if (lastTanyaStr) {
+                                const lastDate = new Date(lastTanyaStr);
+                                const lastDateMidnight = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+                                if (Math.ceil(Math.abs(todayMidnight - lastDateMidnight) / 86400000) > 1 && savedTanyaState !== 'true') {
+                                    currentTanyaStreak = 0; localStorage.setItem('tanya_streak', '0');
+                                }
+                            }
+                            setTanyaStreak(currentTanyaStreak);
                         } else {
                             setStreak(parseInt(localStorage.getItem('daf_streak') || '0', 10));
+                            setTanyaStreak(parseInt(localStorage.getItem('tanya_streak') || '0', 10));
                         }
 
                         setIsLoading(false);
@@ -145,38 +165,51 @@
                 fetchDailyData();
             }, [dateOffset]);
 
-            // בכל פעם שמשנים הגדרות לימוד אישי, נאפס את הטקסט שכבר נטען
+            // איפוס טקסט בעת שינוי מסכת אישית
             useEffect(() => {
-                setTextContents({ gemara: [], rashi: [], tosafot: [], explanation: [] });
-            }, [customTractate, customDaf, customAmud, studyMode]);
+                setTextContents({ gemara: [], explanation: [], rashi: [], tosafot: [], tanya_original: [], tanya_explanation: [] });
+            }, [customTractate, customDaf, customAmud, studyMode, masterMode]);
 
             const parseSefariaText = (heData) => {
-                if (!heData || heData.length === 0) return ['לא נמצא טקסט עבור מקור זה.'];
+                if (!heData || heData.length === 0) return ['לא נמצא טקסט במערכת ספריא עבור מקור זה.'];
                 if (Array.isArray(heData[0])) return heData.flat().filter(Boolean);
                 return heData;
             };
 
             const fetchTextData = async (tabName, referenceToFetch) => {
-                // אם הטקסט לאותה לשונית כבר טעון ברפרנס הנוכחי - אל תמשוך שוב
-                if (textContents[tabName].length > 0 && currentActiveRef === referenceToFetch) return; 
+                if (textContents[tabName] && textContents[tabName].length > 0 && currentActiveRef === referenceToFetch) return; 
                 
                 setIsTextLoading(true);
                 try {
                     let url = '';
-                    // החלפת רווחים בקו תחתון עבור Sefaria API (למשל Bava Metzia -> Bava_Metzia)
                     const safeRef = referenceToFetch.replace(/ /g, '_');
                     
                     switch (tabName) {
                         case 'gemara': url = `https://www.sefaria.org/api/texts/${safeRef}`; break;
+                        case 'explanation': url = `https://www.sefaria.org/api/texts/Steinsaltz_on_${safeRef}`; break;
                         case 'rashi': url = `https://www.sefaria.org/api/texts/Rashi_on_${safeRef}`; break;
                         case 'tosafot': url = `https://www.sefaria.org/api/texts/Tosafot_on_${safeRef}`; break;
-                        case 'explanation': url = `https://www.sefaria.org/api/texts/Steinsaltz_on_${safeRef}`; break;
+                        case 'tanya_original': url = `https://www.sefaria.org/api/texts/${safeRef}`; break;
+                        case 'tanya_explanation': url = `https://www.sefaria.org/api/texts/Steinsaltz_on_${safeRef}`; break;
                     }
 
                     const response = await fetch(url);
                     const data = await response.json();
+                    let hebrewText = parseSefariaText(data.he);
+
+                    // גיבוי למקרה שאין ביאור מובנה לתניא
+                    if (tabName === 'tanya_explanation' && (!data.he || data.he.length === 0)) {
+                        try {
+                            const fbRes = await fetch(`https://www.sefaria.org/api/texts/Lessons_in_Tanya_on_${safeRef}`);
+                            const fbData = await fbRes.json();
+                            if (fbData.he && fbData.he.length > 0) hebrewText = parseSefariaText(fbData.he);
+                            else hebrewText = ['לא נמצא ביאור (שטיינזלץ / שיעורים בתניא) עבור מקטע זה.'];
+                        } catch (e) {
+                            hebrewText = ['לא נמצא ביאור (שטיינזלץ / שיעורים בתניא) עבור מקטע זה.'];
+                        }
+                    }
                     
-                    setTextContents(prev => ({ ...prev, [tabName]: parseSefariaText(data.he) }));
+                    setTextContents(prev => ({ ...prev, [tabName]: hebrewText }));
                 } catch (error) {
                     console.error('Error fetching text:', error);
                     setTextContents(prev => ({ ...prev, [tabName]: ['שגיאה בטעינת הטקסט.'] }));
@@ -185,13 +218,18 @@
             };
 
             const handleEnterBeitMidrash = () => {
-                const referenceToFetch = studyMode === 'daily' 
-                    ? dafInfo.ref 
-                    : `${customTractate}.${customDaf}${customAmud}`;
+                let referenceToFetch = '';
+                if (masterMode === 'daf_yomi') {
+                    referenceToFetch = studyMode === 'daily' ? dafInfo.ref : `${customTractate}.${customDaf}${customAmud}`;
+                    setActiveTab('gemara');
+                } else {
+                    referenceToFetch = tanyaInfo.ref;
+                    setActiveTab('tanya_original');
+                }
                 
                 setCurrentActiveRef(referenceToFetch);
                 setShowText(true);
-                fetchTextData(activeTab, referenceToFetch);
+                fetchTextData(masterMode === 'daf_yomi' ? 'gemara' : 'tanya_original', referenceToFetch);
             };
 
             const handleTabClick = (tabName) => {
@@ -200,83 +238,99 @@
             };
 
             const handleToggleLearn = () => {
-                const newState = !isLearned;
-                setIsLearned(newState);
                 const todayStr = new Date().toISOString();
                 
-                let newStreak = streak;
-                if (newState) {
-                    newStreak += 1;
-                    localStorage.setItem('daf_last_learned_date', todayStr);
-                } else {
-                    newStreak = Math.max(0, streak - 1);
-                }
-                setStreak(newStreak);
-                localStorage.setItem('daf_streak', newStreak.toString());
-                localStorage.setItem(`daf_learned_${dateInfo.greg}`, newState.toString());
-
-                let currentHistory = [...learningHistory];
-                if (newState) {
-                    if (!currentHistory.some(item => item.gregDate === dateInfo.greg)) {
-                        currentHistory.unshift({ gregDate: dateInfo.greg, heDate: dateInfo.he, dafName: dafInfo.he });
+                if (masterMode === 'daf_yomi') {
+                    const newState = !isLearned;
+                    setIsLearned(newState);
+                    let newStreak = streak;
+                    if (newState) {
+                        newStreak += 1; localStorage.setItem('daf_last_learned_date', todayStr);
+                    } else {
+                        newStreak = Math.max(0, streak - 1);
                     }
+                    setStreak(newStreak);
+                    localStorage.setItem('daf_streak', newStreak.toString());
+                    localStorage.setItem(`daf_learned_${dateInfo.greg}`, newState.toString());
+
+                    let currentHistory = [...learningHistory];
+                    if (newState) {
+                        if (!currentHistory.some(item => item.gregDate === dateInfo.greg)) {
+                            currentHistory.unshift({ gregDate: dateInfo.greg, heDate: dateInfo.he, dafName: dafInfo.he });
+                        }
+                    } else currentHistory = currentHistory.filter(item => item.gregDate !== dateInfo.greg);
+                    setLearningHistory(currentHistory);
+                    localStorage.setItem('daf_history', JSON.stringify(currentHistory));
                 } else {
-                    currentHistory = currentHistory.filter(item => item.gregDate !== dateInfo.greg);
+                    const newState = !isTanyaLearned;
+                    setIsTanyaLearned(newState);
+                    let newStreak = tanyaStreak;
+                    if (newState) {
+                        newStreak += 1; localStorage.setItem('tanya_last_learned_date', todayStr);
+                    } else {
+                        newStreak = Math.max(0, tanyaStreak - 1);
+                    }
+                    setTanyaStreak(newStreak);
+                    localStorage.setItem('tanya_streak', newStreak.toString());
+                    localStorage.setItem(`tanya_learned_${dateInfo.greg}`, newState.toString());
+
+                    let currentHistory = [...tanyaHistory];
+                    if (newState) {
+                        if (!currentHistory.some(item => item.gregDate === dateInfo.greg)) {
+                            currentHistory.unshift({ gregDate: dateInfo.greg, heDate: dateInfo.he, dafName: tanyaInfo.he });
+                        }
+                    } else currentHistory = currentHistory.filter(item => item.gregDate !== dateInfo.greg);
+                    setTanyaHistory(currentHistory);
+                    localStorage.setItem('tanya_history', JSON.stringify(currentHistory));
                 }
-                setLearningHistory(currentHistory);
-                localStorage.setItem('daf_history', JSON.stringify(currentHistory));
             };
 
-            // עזר לקבלת השם בעברית של המסכת הנבחרת
             const getCustomTractateHebrewName = () => {
                 const found = TRACTATES.find(t => t.en === customTractate);
                 return found ? found.he : '';
             };
 
+            const currentTabs = masterMode === 'daf_yomi' 
+                ? [{ id: 'gemara', label: 'גמרא' }, { id: 'explanation', label: 'ביאור' }, { id: 'rashi', label: 'רש"י' }, { id: 'tosafot', label: 'תוספות' }]
+                : [{ id: 'tanya_original', label: 'תניא' }, { id: 'tanya_explanation', label: 'ביאור' }];
+
             return (
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-purple-200 flex flex-col min-h-[85vh] relative w-full">
                     
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white text-center relative shrink-0 rounded-b-[2rem] shadow-md z-10">
+                    {/* Header מתקדם */}
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 pt-10 text-white text-center relative shrink-0 rounded-b-[2rem] shadow-md z-10">
                         <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1 shadow-sm">
                             <span className="text-xl">🔥</span>
-                            <span className="font-bold">{streak}</span>
+                            <span className="font-bold">{masterMode === 'daf_yomi' ? streak : tanyaStreak}</span>
                         </div>
                         
-                        <button 
-                            onClick={() => setShowHistoryModal(true)}
-                            className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-colors shadow-sm"
-                            title="יומן למידה"
-                        >
+                        <button onClick={() => setShowHistoryModal(true)} className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-colors shadow-sm" title="יומן למידה">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                         </button>
 
-                        <h1 className="text-3xl font-bold mt-2 shadow-sm">הדף היומי שלי 📖</h1>
-                        
-                        {/* Selector for Study Mode */}
-                        <div className="flex bg-white/20 p-1 rounded-xl mt-4 max-w-[250px] mx-auto shadow-inner">
-                            <button 
-                                onClick={() => setStudyMode('daily')}
-                                className={`flex-1 py-1.5 px-3 rounded-lg text-sm font-bold transition-all ${studyMode === 'daily' ? 'bg-white text-purple-600 shadow-sm' : 'text-purple-100 hover:text-white'}`}
-                            >
-                                דף יומי
-                            </button>
-                            <button 
-                                onClick={() => setStudyMode('custom')}
-                                className={`flex-1 py-1.5 px-3 rounded-lg text-sm font-bold transition-all ${studyMode === 'custom' ? 'bg-white text-purple-600 shadow-sm' : 'text-purple-100 hover:text-white'}`}
-                            >
-                                לימוד אישי
-                            </button>
+                        {/* מתג גמרא / תניא */}
+                        <div className="flex justify-center gap-4 mt-2 mb-4">
+                            <button onClick={() => {setMasterMode('daf_yomi'); setShowText(false);}} className={`px-8 py-2 rounded-full text-lg font-bold transition-all shadow-md ${masterMode === 'daf_yomi' ? 'bg-white text-purple-700 ring-4 ring-purple-300' : 'bg-purple-700/40 text-white hover:bg-purple-600/60'}`}>גמרא 📖</button>
+                            <button onClick={() => {setMasterMode('tanya'); setShowText(false);}} className={`px-8 py-2 rounded-full text-lg font-bold transition-all shadow-md ${masterMode === 'tanya' ? 'bg-white text-purple-700 ring-4 ring-purple-300' : 'bg-purple-700/40 text-white hover:bg-purple-600/60'}`}>תניא 🕯️</button>
                         </div>
+
+                        {/* מתג פנימי לגמרא (יומי או אישי) */}
+                        {masterMode === 'daf_yomi' && (
+                            <div className="flex bg-white/20 p-1 rounded-xl mt-4 max-w-[200px] mx-auto shadow-inner">
+                                <button onClick={() => setStudyMode('daily')} className={`flex-1 py-1 px-3 rounded-lg text-sm font-bold transition-all ${studyMode === 'daily' ? 'bg-white text-purple-600 shadow-sm' : 'text-purple-100 hover:text-white'}`}>יומי</button>
+                                <button onClick={() => setStudyMode('custom')} className={`flex-1 py-1 px-3 rounded-lg text-sm font-bold transition-all ${studyMode === 'custom' ? 'bg-white text-purple-600 shadow-sm' : 'text-purple-100 hover:text-white'}`}>אישי</button>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Main Content Area */}
+                    {/* אזור התוכן המרכזי */}
                     <div className="p-6 text-center overflow-y-auto grow custom-scrollbar flex flex-col justify-center">
                         
-                        {studyMode === 'daily' ? (
-                            // --- מסך הדף היומי ---
+                        {(masterMode === 'tanya' || (masterMode === 'daf_yomi' && studyMode === 'daily')) ? (
                             <div className="flex flex-col items-center animate-fade-in">
-                                <div className="flex items-center justify-center gap-5 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2 shadow-inner min-w-[240px] mb-6">
+                                
+                                {/* בורר התאריכים (משותף לגמרא יומית ולתניא) */}
+                                <div className="flex items-center justify-center gap-5 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2 shadow-inner min-w-[240px] mb-6 mt-2">
                                     <button onClick={() => setDateOffset(prev => prev - 1)} className="p-2 hover:bg-purple-100 text-purple-500 rounded-full transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg></button>
                                     <div className="flex flex-col gap-0 text-center flex-1">
                                         {isLoading ? <span className="text-purple-400 animate-pulse text-sm py-2">מחשב...</span> : (
@@ -293,18 +347,20 @@
                                     <button onClick={() => setDateOffset(0)} className="mb-4 -mt-2 text-xs bg-purple-100 text-purple-700 px-4 py-1.5 rounded-full font-bold transition-colors">חזור להיום</button>
                                 )}
 
+                                {/* תצוגת שם הדף/הפרק */}
                                 <h2 className={`text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-8 transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-                                    {dafInfo.he}
+                                    {masterMode === 'daf_yomi' ? dafInfo.he : tanyaInfo.he}
                                 </h2>
 
+                                {/* כפתור הלמידה (הסטטוס נמשך בהתאם למצב) */}
                                 <button
                                     onClick={handleToggleLearn}
                                     disabled={isLoading}
                                     className={`w-full py-4 px-6 mb-4 rounded-2xl text-xl font-bold transition-all duration-300 flex items-center justify-center gap-3 shadow-md ${
-                                        isLearned ? 'bg-green-500 text-white hover:bg-green-600 ring-4 ring-green-200' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-2 border-indigo-200'
+                                        (masterMode === 'daf_yomi' ? isLearned : isTanyaLearned) ? 'bg-green-500 text-white hover:bg-green-600 ring-4 ring-green-200' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-2 border-indigo-200'
                                     }`}
                                 >
-                                    {isLearned ? (
+                                    {(masterMode === 'daf_yomi' ? isLearned : isTanyaLearned) ? (
                                         <><span>🎉 זכיתי ולמדתי!</span><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg></>
                                     ) : (
                                         <><span>סמן כנלמד</span><div className="w-6 h-6 rounded-full border-2 border-indigo-400"></div></>
@@ -312,91 +368,61 @@
                                 </button>
                             </div>
                         ) : (
-                            // --- מסך לימוד חופשי ---
+                            // ממשק בחירה חופשית (גמרא בלבד)
                             <div className="flex flex-col items-center animate-fade-in w-full bg-gray-50 border border-gray-100 p-5 rounded-2xl mb-6 shadow-sm">
                                 <h2 className="text-xl font-bold text-gray-700 mb-4">בחר דף ללמידה:</h2>
                                 
                                 <div className="w-full flex flex-col gap-3">
                                     <div className="flex flex-col items-start w-full">
                                         <label className="text-sm font-semibold text-gray-500 mb-1">מסכת</label>
-                                        <select 
-                                            value={customTractate} 
-                                            onChange={(e) => setCustomTractate(e.target.value)}
-                                            className="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 text-lg font-bold text-purple-700 focus:outline-none focus:border-purple-500 appearance-none text-center"
-                                        >
-                                            {TRACTATES.map(t => (
-                                                <option key={t.en} value={t.en}>{t.he}</option>
-                                            ))}
+                                        <select value={customTractate} onChange={(e) => setCustomTractate(e.target.value)} className="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 text-lg font-bold text-purple-700 focus:outline-none focus:border-purple-500 appearance-none text-center">
+                                            {TRACTATES.map(t => <option key={t.en} value={t.en}>{t.he}</option>)}
                                         </select>
                                     </div>
-                                    
                                     <div className="flex gap-3 w-full">
                                         <div className="flex flex-col items-start flex-1">
                                             <label className="text-sm font-semibold text-gray-500 mb-1">דף</label>
-                                            <input 
-                                                type="number" 
-                                                min="2" max="175"
-                                                value={customDaf} 
-                                                onChange={(e) => setCustomDaf(e.target.value)}
-                                                className="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 text-lg font-bold text-purple-700 focus:outline-none focus:border-purple-500 text-center"
-                                            />
+                                            <input type="number" min="2" max="175" value={customDaf} onChange={(e) => setCustomDaf(e.target.value)} className="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 text-lg font-bold text-purple-700 focus:outline-none focus:border-purple-500 text-center" />
                                         </div>
                                         <div className="flex flex-col items-start flex-1">
                                             <label className="text-sm font-semibold text-gray-500 mb-1">עמוד</label>
-                                            <select 
-                                                value={customAmud} 
-                                                onChange={(e) => setCustomAmud(e.target.value)}
-                                                className="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 text-lg font-bold text-purple-700 focus:outline-none focus:border-purple-500 appearance-none text-center"
-                                            >
+                                            <select value={customAmud} onChange={(e) => setCustomAmud(e.target.value)} className="w-full bg-white border-2 border-purple-200 rounded-xl px-4 py-3 text-lg font-bold text-purple-700 focus:outline-none focus:border-purple-500 appearance-none text-center">
                                                 <option value="a">א'</option>
                                                 <option value="b">ב'</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
-                                <h3 className="text-2xl font-extrabold text-indigo-700 mt-6 bg-indigo-50 px-6 py-2 rounded-xl">
+                                <h3 className="text-2xl font-extrabold text-indigo-700 mt-6 bg-indigo-50 px-6 py-2 rounded-xl border border-indigo-100">
                                     {getCustomTractateHebrewName()} {customDaf} עמוד {customAmud === 'a' ? "א'" : "ב'"}
                                 </h3>
                             </div>
                         )}
 
-                        {/* כפתור פתיחת בית המדרש המורחב - זמין תמיד בשני המצבים */}
-                        <button 
-                            onClick={handleEnterBeitMidrash}
-                            disabled={isLoading}
-                            className="bg-orange-100 hover:bg-orange-200 text-orange-700 w-full py-4 rounded-2xl text-xl font-bold transition-all shadow-md flex justify-center items-center gap-2 border border-orange-200"
-                        >
+                        <button onClick={handleEnterBeitMidrash} disabled={isLoading} className="bg-orange-100 hover:bg-orange-200 text-orange-700 w-full py-4 rounded-2xl text-xl font-bold transition-all shadow-md flex justify-center items-center gap-2 border border-orange-200">
                             היכנס לבית המדרש 
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                         </button>
                     </div>
 
-                    {/* --- חלונית בית המדרש המורחבת (מסך מלא) --- */}
+                    {/* חלון בית המדרש המורחב (מסך מלא) */}
                     {showText && (
-                        <div className="fixed inset-0 bg-orange-50 z-50 flex flex-col animate-slide-up">
+                        <div className="fixed inset-0 bg-orange-50 z-50 flex flex-col">
                             
-                            {/* שורת הניווט העליונה של הבית מדרש */}
-                            <div className="bg-orange-100 border-b border-orange-200 p-4 flex items-center justify-between shrink-0 shadow-sm">
-                                <h2 className="text-2xl font-extrabold text-orange-900 drop-shadow-sm flex items-center gap-2">
+                            <div className="bg-orange-100 border-b border-orange-200 p-4 flex items-center justify-between shrink-0 shadow-sm pt-6">
+                                <h2 className="text-xl font-extrabold text-orange-900 drop-shadow-sm flex items-center gap-2">
                                     <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                                    {studyMode === 'daily' ? dafInfo.he : `${getCustomTractateHebrewName()} ${customDaf} עמ' ${customAmud === 'a' ? "א'" : "ב'"}`}
+                                    {masterMode === 'daf_yomi' 
+                                        ? (studyMode === 'daily' ? dafInfo.he : `${getCustomTractateHebrewName()} ${customDaf} עמ' ${customAmud === 'a' ? "א'" : "ב'"}`)
+                                        : tanyaInfo.he}
                                 </h2>
-                                <button 
-                                    onClick={() => setShowText(false)} 
-                                    className="bg-orange-200 hover:bg-orange-300 text-orange-800 rounded-full p-2 transition-colors flex items-center gap-1 font-bold px-4"
-                                >
+                                <button onClick={() => setShowText(false)} className="bg-orange-200 hover:bg-orange-300 text-orange-800 rounded-full py-2 px-4 transition-colors flex items-center gap-1 font-bold shadow-sm">
                                     סגור <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 </button>
                             </div>
 
-                            {/* לשוניות למידה */}
                             <div className="flex border-b border-orange-200 bg-white shrink-0 overflow-x-auto custom-scrollbar">
-                                {[
-                                    { id: 'gemara', label: 'גמרא' },
-                                    { id: 'explanation', label: 'ביאור' },
-                                    { id: 'rashi', label: 'רש"י' },
-                                    { id: 'tosafot', label: 'תוספות' }
-                                ].map(tab => (
+                                {currentTabs.map(tab => (
                                     <button 
                                         key={tab.id}
                                         onClick={() => handleTabClick(tab.id)}
@@ -407,15 +433,14 @@
                                 ))}
                             </div>
 
-                            {/* אזור הטקסט הפרוס על כל המסך */}
                             <div className="p-6 text-right overflow-y-auto flex-1 custom-scrollbar pb-20">
                                 {isTextLoading ? (
-                                    <div className="flex flex-col justify-center items-center h-full gap-4 text-orange-600">
+                                    <div className="flex flex-col justify-center items-center h-full gap-4 text-orange-600 mt-10">
                                         <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-orange-600"></div>
-                                        <p className="font-bold animate-pulse">מושך נתונים מספריא...</p>
+                                        <p className="font-bold animate-pulse text-lg">טוען בית מדרש...</p>
                                     </div>
                                 ) : (
-                                    <div className="text-gray-800 leading-[2.2] font-serif text-[1.3rem] max-w-2xl mx-auto sefaria-text" dir="rtl">
+                                    <div className="text-gray-800 leading-[2.2] font-serif text-[1.4rem] max-w-2xl mx-auto sefaria-text" dir="rtl">
                                         {textContents[activeTab].map((paragraph, index) => (
                                             <p key={index} className="mb-6 pb-6 border-b border-orange-200/50 last:border-0" dangerouslySetInnerHTML={{ __html: paragraph }} />
                                         ))}
@@ -425,23 +450,23 @@
                         </div>
                     )}
 
-                    {/* חלונית ההיסטוריה */}
+                    {/* יומן למידה (מודל) */}
                     {showHistoryModal && (
-                        <div className="absolute inset-0 bg-white z-50 flex flex-col animate-slide-up">
-                            <div className="bg-purple-600 p-4 text-white flex items-center justify-between shadow-md shrink-0">
-                                <h2 className="text-2xl font-bold">יומן הלמידה שלי 📚</h2>
+                        <div className="absolute inset-0 bg-white z-50 flex flex-col">
+                            <div className="bg-purple-600 p-4 pt-6 text-white flex items-center justify-between shadow-md shrink-0">
+                                <h2 className="text-2xl font-bold">יומן ה{masterMode === 'daf_yomi' ? 'למידה' : 'תניא'} שלי 📚</h2>
                                 <button onClick={() => setShowHistoryModal(false)} className="bg-purple-700 hover:bg-purple-800 rounded-full p-2 transition-colors">
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 </button>
                             </div>
                             <div className="p-4 overflow-y-auto grow custom-scrollbar bg-gray-50">
-                                {learningHistory.length === 0 ? (
+                                {(masterMode === 'daf_yomi' ? learningHistory : tanyaHistory).length === 0 ? (
                                     <div className="text-center text-gray-500 mt-10">
-                                        <p className="text-xl mb-2">עוד לא למדת דפים.</p>
+                                        <p className="text-xl mb-2">עוד לא נרשמה היסטוריה.</p>
                                     </div>
                                 ) : (
                                     <ul className="space-y-3">
-                                        {learningHistory.map((item, index) => (
+                                        {(masterMode === 'daf_yomi' ? learningHistory : tanyaHistory).map((item, index) => (
                                             <li key={index} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col justify-between items-start">
                                                 <span className="font-bold text-lg text-purple-700">{item.dafName}</span>
                                                 <div className="flex justify-between w-full text-sm text-gray-500 mt-2">
