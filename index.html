@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
+<!DOCTYPE html><html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>בית המדרש הדיגיטלי</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <style>
+  <title>בית המדרש הדיגיטלי</title>  <script src="https://cdn.tailwindcss.com"></script>  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>  <style>
     @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&family=Heebo:wght@300;400;700;900&display=swap');
 
     :root {
@@ -64,13 +56,8 @@
       box-shadow: 0 25px 60px rgba(76,29,149,0.25);
       border: 1px solid rgba(120,83,30,0.18);
     }
-  </style>
-</head>
-
-<body class="min-h-screen flex items-center justify-center p-0 sm:p-4">
-  <div id="root" class="max-w-md w-full mx-auto h-screen sm:h-auto"></div>
-
-  <script type="text/babel">
+  </style></head><body class="min-h-screen flex items-center justify-center p-0 sm:p-4">
+  <div id="root" class="max-w-md w-full mx-auto h-screen sm:h-auto"></div>  <script type="text/babel">
     const { useState, useEffect } = React;
 
     const CHABAD_TANYA_URL = 'https://he.chabad.org/dailystudy/tanya.htm';
@@ -116,18 +103,25 @@
       { he: 'קונטרס אחרון', en: 'Kuntres Acharon', max: 9 }
     ];
 
-    const DAF_YOMI_START_IDS = {
-      Chullin: 4608,
-      Bekhorot: 4890,
-      Arakhin: 5010,
-      Temurah: 5076,
-      Keritot: 5142,
-      Meilah: 5196,
-      Tamid: 5238,
-      Middot: 5256,
-      Kinnim: 5262,
-      Niddah: 5266
+    const TRACTATE_DAF_LIMITS = {
+      Berakhot: 64, Shabbat: 157, Eruvin: 105, Pesachim: 121, Shekalim: 22, Yoma: 88,
+      Sukkah: 56, Beitzah: 40, 'Rosh Hashanah': 35, Taanit: 31, Megillah: 32,
+      'Moed Katan': 29, Chagigah: 27, Yevamot: 122, Ketubot: 112, Nedarim: 91,
+      Nazir: 66, Sotah: 49, Gittin: 90, Kiddushin: 82, 'Bava Kamma': 119,
+      'Bava Metzia': 119, 'Bava Batra': 176, Sanhedrin: 113, Makkot: 24, Shevuot: 49,
+      'Avodah Zarah': 76, Horayot: 14, Zevachim: 120, Menachot: 110, Chullin: 142,
+      Bekhorot: 61, Arakhin: 34, Temurah: 34, Keritot: 28, Meilah: 22, Tamid: 10,
+      Middot: 4, Kinnim: 3, Niddah: 73
     };
+
+    const DAF_YOMI_START_IDS = TRACTATES.reduce((acc, tractate, index) => {
+      if (index === 0) acc[tractate.en] = 1;
+      else {
+        const previous = TRACTATES[index - 1].en;
+        acc[tractate.en] = acc[previous] + ((TRACTATE_DAF_LIMITS[previous] - 1) * 2);
+      }
+      return acc;
+    }, {});
 
     const FALLBACK_DAF = { he: 'חולין כו', ref: 'Chullin.26a' };
     const FALLBACK_TANYA = { he: 'תניא יומי', ref: 'chabad_tanya_daily' };
@@ -162,25 +156,76 @@
       return normalized ? 'https://www.sefaria.org/api/texts/' + encodeURI(prefix + normalized) : '';
     };
 
+    const parseDafRef = (ref) => {
+      const clean = String(ref || '').replaceAll('_', ' ').trim();
+      if (!clean) return null;
+      const parts = clean.split('.');
+      if (parts.length >= 2) {
+        const tractate = parts[0].trim();
+        const page = parts[1].trim();
+        const amud = page.endsWith('b') ? 'b' : 'a';
+        const daf = Number(page.replace('a', '').replace('b', ''));
+        if (tractate && daf) return { tractate, daf, amud };
+      }
+      const words = clean.split(' ');
+      const page = words.pop() || '';
+      const tractate = words.join(' ').trim();
+      const amud = page.endsWith('b') ? 'b' : 'a';
+      const daf = Number(page.replace('a', '').replace('b', ''));
+      if (tractate && daf) return { tractate, daf, amud };
+      return null;
+    };
+
+    const buildDafRef = (tractate, daf, amud) => tractate + '.' + daf + amud;
+
     const getDafYomiPageUrl = (ref) => {
-      const cleanRef = String(ref || '').replace(/_/g, ' ').trim();
-      const match = cleanRef.match(/^(.+?)[\.\s]+(\d+)([ab])?$/i);
-      if (!match) return DAF_YOMI_FALLBACK_URL;
-      const tractate = match[1].trim();
-      const daf = Number(match[2]);
-      const amud = (match[3] || 'a').toLowerCase();
-      const startId = DAF_YOMI_START_IDS[tractate];
-      if (!startId || !daf) return DAF_YOMI_FALLBACK_URL;
-      const id = startId + ((daf - 2) * 2) + (amud === 'b' ? 1 : 0);
+      const parsed = parseDafRef(ref);
+      if (!parsed) return DAF_YOMI_FALLBACK_URL;
+      const startId = DAF_YOMI_START_IDS[parsed.tractate];
+      const maxDaf = TRACTATE_DAF_LIMITS[parsed.tractate] || 175;
+      if (!startId || !parsed.daf || parsed.daf < 2 || parsed.daf > maxDaf) return DAF_YOMI_FALLBACK_URL;
+      const id = startId + ((parsed.daf - 2) * 2) + (parsed.amud === 'b' ? 1 : 0);
       return 'https://daf-yomi.com/DafYomi_Page.aspx?vt=1&id=' + id;
+    };
+
+    const getHebrewDafTitle = (ref) => {
+      const parsed = parseDafRef(ref);
+      if (!parsed) return '';
+      const tractate = TRACTATES.find(t => t.en === parsed.tractate);
+      return (tractate?.he || parsed.tractate) + ' דף ' + toGematria(parsed.daf) + ' ע' + (parsed.amud === 'a' ? 'א' : 'ב');
+    };
+
+    const getAdjacentDafRef = (ref, direction) => {
+      const parsed = parseDafRef(ref);
+      if (!parsed) return ref;
+      const index = TRACTATES.findIndex(t => t.en === parsed.tractate);
+      if (index < 0) return ref;
+      let tractate = parsed.tractate;
+      let daf = parsed.daf;
+      let amud = parsed.amud;
+      const maxDaf = TRACTATE_DAF_LIMITS[tractate] || 175;
+      if (direction > 0) {
+        if (amud === 'a') amud = 'b';
+        else if (daf < maxDaf) { daf += 1; amud = 'a'; }
+        else if (TRACTATES[index + 1]) { tractate = TRACTATES[index + 1].en; daf = 2; amud = 'a'; }
+      } else {
+        if (amud === 'b') amud = 'a';
+        else if (daf > 2) { daf -= 1; amud = 'b'; }
+        else if (TRACTATES[index - 1]) { tractate = TRACTATES[index - 1].en; daf = TRACTATE_DAF_LIMITS[tractate] || 2; amud = 'b'; }
+      }
+      return buildDafRef(tractate, daf, amud);
     };
 
     const runSmokeTests = () => {
       console.assert(toGematria(15) === 'טו', 'בדיקה נכשלה: גימטריה 15');
       console.assert(toGematria(16) === 'טז', 'בדיקה נכשלה: גימטריה 16');
       console.assert(toGematria(400) === 'ת', 'בדיקה נכשלה: גימטריה 400');
+      console.assert(getDafYomiPageUrl('Berakhot.2a').includes('id=1'), 'בדיקה נכשלה: צורת הדף ברכות ב א');
+      console.assert(getDafYomiPageUrl('Shabbat.2a').includes('id=127'), 'בדיקה נכשלה: צורת הדף שבת ב א');
       console.assert(getDafYomiPageUrl('Chullin.26a').includes('id=4656'), 'בדיקה נכשלה: צורת הדף חולין כו א');
       console.assert(getDafYomiPageUrl('Chullin.26b').includes('id=4657'), 'בדיקה נכשלה: צורת הדף חולין כו ב');
+      console.assert(getAdjacentDafRef('Chullin.26a', 1) === 'Chullin.26b', 'בדיקה נכשלה: מעבר עמוד');
+      console.assert(getAdjacentDafRef('Chullin.26b', 1) === 'Chullin.27a', 'בדיקה נכשלה: מעבר דף');
       console.assert(buildSefariaTextUrl('Chullin.26a').includes('Chullin.26a'), 'בדיקה נכשלה: URL ספריא גמרא');
       console.assert(buildSefariaCommentaryUrl('Rashi_on_', 'Chullin.26a').includes('Rashi_on_Chullin.26a'), 'בדיקה נכשלה: URL רש"י');
       console.assert(CHABAD_TANYA_URL.includes('chabad.org/dailystudy/tanya.htm'), 'בדיקה נכשלה: URL תניא חב"ד');
@@ -211,6 +256,7 @@
 
       const [showText, setShowText] = useState(false);
       const [activeTab, setActiveTab] = useState('gemara');
+      const [currentLearningTitle, setCurrentLearningTitle] = useState('');
       const [textContents, setTextContents] = useState({ gemara: [], explanation: [], rashi: [], tosafot: [], scan_url: '' });
       const [isTextLoading, setIsTextLoading] = useState(false);
       const [textError, setTextError] = useState('');
@@ -310,12 +356,20 @@
         setTextContents({ gemara: [], explanation: [], rashi: [], tosafot: [], scan_url: '' });
       };
 
-      const getTextUrlForTab = (tab, ref) => {
-        if (tab === 'gemara') return buildSefariaTextUrl(ref);
-        if (tab === 'explanation') return buildSefariaCommentaryUrl('Steinsaltz_on_', ref);
-        if (tab === 'rashi') return buildSefariaCommentaryUrl('Rashi_on_', ref);
-        if (tab === 'tosafot') return buildSefariaCommentaryUrl('Tosafot_on_', ref);
-        return '';
+      const getTextUrlsForTab = (tab, ref) => {
+        if (tab === 'gemara') return [buildSefariaTextUrl(ref)];
+        if (tab === 'explanation') return [buildSefariaCommentaryUrl('Steinsaltz_on_', ref)];
+        if (tab === 'rashi') return [buildSefariaCommentaryUrl('Rashi_on_', ref)];
+        if (tab === 'tosafot') {
+          const parsed = parseDafRef(ref);
+          const baseRef = parsed ? buildDafRef(parsed.tractate, parsed.daf, parsed.amud) : ref;
+          return [
+            buildSefariaCommentaryUrl('Tosafot_on_', baseRef),
+            buildSefariaTextUrl('Tosafot on ' + String(baseRef).replace('.', ' ')),
+            buildSefariaCommentaryUrl('Tosafot_on_', ref)
+          ].filter(Boolean);
+        }
+        return [];
       };
 
       const fetchTextData = async (tab, ref) => {
@@ -333,25 +387,34 @@
           return;
         }
 
-        const url = getTextUrlForTab(tab, activeRef);
-        if (!url) {
+        const urls = getTextUrlsForTab(tab, activeRef);
+        if (!urls.length) {
           setTextError('הלשונית הזו לא מוגדרת לטעינה.');
           return;
         }
 
         setIsTextLoading(true);
-        const result = await safeJsonFetch(url);
-        if (!result.ok) {
-          setTextContents(prev => ({ ...prev, [tab]: [] }));
-          setTextError(`לא הצלחתי לטעון את התוכן. ${result.error}`);
-          setIsTextLoading(false);
-          return;
+        let clean = [];
+        let lastError = '';
+
+        for (const url of urls) {
+          const result = await safeJsonFetch(url);
+          if (!result.ok) {
+            lastError = result.error;
+            continue;
+          }
+          const raw = Array.isArray(result.data.he) ? result.data.he.flat(Infinity) : [result.data.he];
+          clean = raw.filter(item => typeof item === 'string' && item.trim());
+          if (clean.length) break;
+          lastError = 'לא נמצא תוכן עברי במקור הזה';
         }
 
-        const raw = Array.isArray(result.data.he) ? result.data.he.flat(Infinity) : [result.data.he];
-        const clean = raw.filter(item => typeof item === 'string' && item.trim());
         setTextContents(prev => ({ ...prev, [tab]: clean }));
-        if (!clean.length) setTextError('לא נמצא תוכן עברי להצגה בלשונית הזו.');
+        if (!clean.length) {
+          setTextError(tab === 'tosafot'
+            ? `לא נמצאו תוספות לדף הזה במאגר ספריא. ${lastError || ''}`
+            : `לא נמצא תוכן עברי להצגה בלשונית הזו. ${lastError || ''}`);
+        }
         setIsTextLoading(false);
       };
 
@@ -360,6 +423,7 @@
         if (!ref) return;
         resetText();
         setCurrentActiveRef(ref);
+        setCurrentLearningTitle(getLearningTitle());
         loadNoteForRef(ref);
         setShowNotes(false);
         setShowText(true);
@@ -371,6 +435,39 @@
       const handleTabClick = (tab) => {
         setActiveTab(tab);
         fetchTextData(tab, currentActiveRef);
+      };
+
+      const refreshOpenDaf = (newRef, preferredTab = activeTab) => {
+        resetText();
+        setCurrentActiveRef(newRef);
+        setCurrentLearningTitle(getHebrewDafTitle(newRef));
+        loadNoteForRef(newRef);
+        setActiveTab(preferredTab);
+        fetchTextData(preferredTab, newRef);
+      };
+
+      const handleOpenPrevDaf = () => {
+        if (masterMode !== 'daf_yomi') return;
+        const newRef = getAdjacentDafRef(currentActiveRef, -1);
+        const parsed = parseDafRef(newRef);
+        if (parsed && studyMode === 'custom') {
+          setCustomTractate(parsed.tractate);
+          setCustomDaf(parsed.daf);
+          setCustomAmud(parsed.amud);
+        }
+        refreshOpenDaf(newRef);
+      };
+
+      const handleOpenNextDaf = () => {
+        if (masterMode !== 'daf_yomi') return;
+        const newRef = getAdjacentDafRef(currentActiveRef, 1);
+        const parsed = parseDafRef(newRef);
+        if (parsed && studyMode === 'custom') {
+          setCustomTractate(parsed.tractate);
+          setCustomDaf(parsed.daf);
+          setCustomAmud(parsed.amud);
+        }
+        refreshOpenDaf(newRef);
       };
 
       const handleToggleLearn = () => {
@@ -512,7 +609,7 @@
               <div className="bg-violet-900 p-4 pt-10 text-white flex items-center justify-between shrink-0 shadow-2xl gap-3">
                 <h2 className="text-xl font-black flex items-center gap-3 min-w-0">
                   <span className="p-2 bg-white/10 rounded-xl shrink-0">📚</span>
-                  <span className="truncate">{title}</span>
+                  <span className="truncate">{currentLearningTitle || title}</span>
                 </h2>
                 <div className="flex items-center gap-2 shrink-0">
                   <button onClick={() => setShowNotes(prev => !prev)} className="relative bg-white/10 hover:bg-white/20 text-white rounded-2xl py-2 px-4 font-black text-sm border border-white/20 transition-all active:scale-90">
@@ -522,6 +619,13 @@
                   <button onClick={() => setShowText(false)} className="bg-white/10 hover:bg-white/20 text-white rounded-2xl py-2 px-4 font-black text-sm border border-white/20 transition-all active:scale-90">סגור</button>
                 </div>
               </div>
+
+              {masterMode === 'daf_yomi' && (
+                <div className="flex items-center gap-2 bg-white px-4 py-3 border-b border-violet-100 shrink-0">
+                  <button onClick={handleOpenPrevDaf} className="flex-1 bg-violet-50 text-violet-700 border border-violet-100 rounded-2xl py-3 font-black active:scale-95 transition-all">‹ עמוד קודם</button>
+                  <button onClick={handleOpenNextDaf} className="flex-1 bg-violet-600 text-white rounded-2xl py-3 font-black shadow active:scale-95 transition-all">עמוד הבא ›</button>
+                </div>
+              )}
 
               <div className="flex bg-violet-50 shrink-0 overflow-x-auto custom-scrollbar border-b border-violet-100">
                 {(masterMode === 'daf_yomi'
@@ -618,6 +722,5 @@
     if (rootElement) {
       ReactDOM.createRoot(rootElement).render(<DafYomiApp />);
     }
-  </script>
-</body>
+  </script></body>
 </html>
