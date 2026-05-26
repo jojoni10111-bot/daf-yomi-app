@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>בית המדרש הדיגיטלי 📖</title>
+    <title>בית המדרש הדיגיטלי</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -44,342 +44,610 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .page-scan-container {
-            width: 100%;
-            height: 100%;
-            overflow: auto;
+        .portal-card {
+            min-height: 100%;
             display: flex;
+            align-items: center;
             justify-content: center;
-            background: #262626;
-            padding: 10px;
+            padding: 28px;
+            background:
+                radial-gradient(circle at top, rgba(139,92,246,0.18), transparent 35%),
+                linear-gradient(135deg, #f8f5ef 0%, #efe2c6 100%);
         }
 
-        .page-scan-img {
-            max-width: 100%;
-            height: auto;
-            cursor: zoom-in;
-            border-radius: 8px;
+        .daf-paper-preview {
+            width: min(380px, 92vw);
+            min-height: 430px;
+            border-radius: 26px;
+            background:
+                linear-gradient(rgba(255,255,255,0.78), rgba(255,255,255,0.78)),
+                repeating-linear-gradient(0deg, rgba(76,29,149,0.10) 0px, rgba(76,29,149,0.10) 1px, transparent 1px, transparent 22px),
+                repeating-linear-gradient(90deg, rgba(76,29,149,0.08) 0px, rgba(76,29,149,0.08) 1px, transparent 1px, transparent 42px);
+            box-shadow: 0 25px 60px rgba(76,29,149,0.25);
+            border: 1px solid rgba(120,83,30,0.18);
         }
-
-        .page-scan-img.zoomed { max-width: 250%; }
     </style>
 
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3389/3389081.png" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3389/3389081.png" />
 </head>
-
 <body class="min-h-screen flex items-center justify-center p-0 sm:p-4">
-<div id="root" class="max-w-md w-full mx-auto h-screen sm:h-auto"></div>
+    <div id="root" class="max-w-md w-full mx-auto h-screen sm:h-auto"></div>
 
-<script type="text/babel">
-const { useState, useEffect } = React;
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-const toGematria = (num) => {
-    if (num <= 0) return '';
-    const units = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט'];
-    const tens = ['', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ'];
-    let str = '';
-    let h = Math.floor(num / 100);
-    let t = Math.floor((num % 100) / 10);
-    let u = num % 10;
+        const toGematria = (num) => {
+            const n = Number(num);
+            if (!n || n <= 0) return '';
+            const units = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט'];
+            const tens = ['', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ'];
+            let str = '';
+            const h = Math.floor(n / 100);
+            const t = Math.floor((n % 100) / 10);
+            const u = n % 10;
 
-    if (h === 1) str += 'ק';
-    else if (h === 2) str += 'ר';
+            if (h === 1) str += 'ק';
+            else if (h === 2) str += 'ר';
+            else if (h === 3) str += 'ש';
+            else if (h === 4) str += 'ת';
 
-    if (t === 1 && u === 5) str += 'טו';
-    else if (t === 1 && u === 6) str += 'טז';
-    else str += tens[t] + units[u];
+            if (t === 1 && u === 5) str += 'טו';
+            else if (t === 1 && u === 6) str += 'טז';
+            else str += (tens[t] || '') + (units[u] || '');
 
-    return str;
-};
+            return str;
+        };
 
-const TRACTATES = [
-    { he: 'ברכות', en: 'Berakhot' }, { he: 'שבת', en: 'Shabbat' }, { he: 'עירובין', en: 'Eruvin' },
-    { he: 'פסחים', en: 'Pesachim' }, { he: 'שקלים', en: 'Shekalim' }, { he: 'יומא', en: 'Yoma' },
-    { he: 'סוכה', en: 'Sukkah' }, { he: 'ביצה', en: 'Beitzah' }, { he: 'ראש השנה', en: 'Rosh Hashanah' },
-    { he: 'תענית', en: 'Taanit' }, { he: 'מגילה', en: 'Megillah' }, { he: 'מועד קטן', en: 'Moed Katan' },
-    { he: 'חגיגה', en: 'Chagigah' }, { he: 'יבמות', en: 'Yevamot' }, { he: 'כתובות', en: 'Ketubot' },
-    { he: 'נדרים', en: 'Nedarim' }, { he: 'נזיר', en: 'Nazir' }, { he: 'סוטה', en: 'Sotah' },
-    { he: 'גיטין', en: 'Gittin' }, { he: 'קידושין', en: 'Kiddushin' }, { he: 'בבא קמא', en: 'Bava Kamma' },
-    { he: 'בבא מציעא', en: 'Bava Metzia' }, { he: 'בבא בתרא', en: 'Bava Batra' }, { he: 'סנהדרין', en: 'Sanhedrin' },
-    { he: 'מכות', en: 'Makkot' }, { he: 'שבועות', en: 'Shevuot' }, { he: 'עבודה זרה', en: 'Avodah Zarah' },
-    { he: 'הוריות', en: 'Horayot' }, { he: 'זבחים', en: 'Zevachim' }, { he: 'מנחות', en: 'Menachot' },
-    { he: 'חולין', en: 'Chullin' }, { he: 'בכורות', en: 'Bekhorot' }, { he: 'ערכין', en: 'Arakhin' },
-    { he: 'תמורה', en: 'Temurah' }, { he: 'כריתות', en: 'Keritot' }, { he: 'מעילה', en: 'Meilah' },
-    { he: 'תמיד', en: 'Tamid' }, { he: 'מידות', en: 'Middot' }, { he: 'קינים', en: 'Kinnim' }, { he: 'נידה', en: 'Niddah' }
-];
+        const TRACTATES = [
+            { he: 'ברכות', en: 'Berakhot' }, { he: 'שבת', en: 'Shabbat' }, { he: 'עירובין', en: 'Eruvin' },
+            { he: 'פסחים', en: 'Pesachim' }, { he: 'שקלים', en: 'Shekalim' }, { he: 'יומא', en: 'Yoma' },
+            { he: 'סוכה', en: 'Sukkah' }, { he: 'ביצה', en: 'Beitzah' }, { he: 'ראש השנה', en: 'Rosh Hashanah' },
+            { he: 'תענית', en: 'Taanit' }, { he: 'מגילה', en: 'Megillah' }, { he: 'מועד קטן', en: 'Moed Katan' },
+            { he: 'חגיגה', en: 'Chagigah' }, { he: 'יבמות', en: 'Yevamot' }, { he: 'כתובות', en: 'Ketubot' },
+            { he: 'נדרים', en: 'Nedarim' }, { he: 'נזיר', en: 'Nazir' }, { he: 'סוטה', en: 'Sotah' },
+            { he: 'גיטין', en: 'Gittin' }, { he: 'קידושין', en: 'Kiddushin' }, { he: 'בבא קמא', en: 'Bava Kamma' },
+            { he: 'בבא מציעא', en: 'Bava Metzia' }, { he: 'בבא בתרא', en: 'Bava Batra' }, { he: 'סנהדרין', en: 'Sanhedrin' },
+            { he: 'מכות', en: 'Makkot' }, { he: 'שבועות', en: 'Shevuot' }, { he: 'עבודה זרה', en: 'Avodah Zarah' },
+            { he: 'הוריות', en: 'Horayot' }, { he: 'זבחים', en: 'Zevachim' }, { he: 'מנחות', en: 'Menachot' },
+            { he: 'חולין', en: 'Chullin' }, { he: 'בכורות', en: 'Bekhorot' }, { he: 'ערכין', en: 'Arakhin' },
+            { he: 'תמורה', en: 'Temurah' }, { he: 'כריתות', en: 'Keritot' }, { he: 'מעילה', en: 'Meilah' },
+            { he: 'תמיד', en: 'Tamid' }, { he: 'מידות', en: 'Middot' }, { he: 'קינים', en: 'Kinnim' }, { he: 'נידה', en: 'Niddah' }
+        ];
 
-const TANYA_SECTIONS = [
-    { he: 'לקוטי אמרים', en: 'Tanya, Likutei Amarim', max: 53 },
-    { he: 'שער היחוד והאמונה', en: 'Tanya, Shaar HaYichud VeHaEmunah', max: 12 },
-    { he: 'אגרת התשובה', en: 'Tanya, Iggeret HaTeshuvah', max: 12 },
-    { he: 'אגרת הקודש', en: 'Tanya, Iggeret HaKodesh', max: 32 },
-    { he: 'קונטרס אחרון', en: 'Tanya, Kuntres Acharon', max: 9 }
-];
+        const TANYA_SECTIONS = [
+            { he: 'לקוטי אמרים', en: 'Tanya, Likutei Amarim', max: 53 },
+            { he: 'שער היחוד והאמונה', en: 'Tanya, Shaar HaYichud VeHaEmunah', max: 12 },
+            { he: 'אגרת התשובה', en: 'Tanya, Iggeret HaTeshuvah', max: 12 },
+            { he: 'אגרת הקודש', en: 'Tanya, Iggeret HaKodesh', max: 32 },
+            { he: 'קונטרס אחרון', en: 'Tanya, Kuntres Acharon', max: 9 }
+        ];
 
-function DafYomiApp() {
-    const [masterMode, setMasterMode] = useState('daf_yomi');
-    const [studyMode, setStudyMode] = useState('daily');
+        const DAF_YOMI_START_IDS = {
+            Chullin: 4608,
+            Bekhorot: 4890,
+            Arakhin: 5010,
+            Temurah: 5076,
+            Keritot: 5142,
+            Meilah: 5196,
+            Tamid: 5238,
+            Middot: 5256,
+            Kinnim: 5262,
+            Niddah: 5266
+        };
 
-    const [customTractate, setCustomTractate] = useState(TRACTATES[0].en);
-    const [customDaf, setCustomDaf] = useState(2);
-    const [customAmud, setCustomAmud] = useState('a');
+        const getDafYomiPageUrl = (ref) => {
+            const cleanRef = String(ref || '').replace(/_/g, ' ').trim();
+            const match = cleanRef.match(/^(.+?)[\.\s]+(\d+)([ab])?$/i);
+            if (!match) return 'https://daf-yomi.com/';
 
-    const [customTanyaSection, setCustomTanyaSection] = useState(TANYA_SECTIONS[0].en);
-    const [customTanyaChapter, setCustomTanyaChapter] = useState(1);
+            const tractate = match[1].trim();
+            const daf = Number(match[2]);
+            const amud = (match[3] || 'a').toLowerCase();
+            const startId = DAF_YOMI_START_IDS[tractate];
 
-    const [dateOffset, setDateOffset] = useState(0);
-    const [dateInfo, setDateInfo] = useState({ he: '', day: '', greg: '' });
-    const [isLoading, setIsLoading] = useState(true);
+            if (!startId || !daf) return 'https://daf-yomi.com/';
 
-    const [dafInfo, setDafInfo] = useState({ he: '', en: '', ref: '' });
-    const [isLearned, setIsLearned] = useState(false);
-    const [streak, setStreak] = useState(0);
+            const id = startId + ((daf - 2) * 2) + (amud === 'b' ? 1 : 0);
+            return 'https://daf-yomi.com/DafYomi_Page.aspx?vt=1&id=' + id;
+        };
 
-    const [tanyaInfo, setTanyaInfo] = useState({ he: '', ref: '' });
-    const [isTanyaLearned, setIsTanyaLearned] = useState(false);
-    const [tanyaStreak, setTanyaStreak] = useState(0);
+        const runSmokeTests = () => {
+            console.assert(toGematria(15) === 'טו', 'בדיקה נכשלה: גימטריה 15');
+            console.assert(toGematria(16) === 'טז', 'בדיקה נכשלה: גימטריה 16');
+            console.assert(getDafYomiPageUrl('Chullin.26a').includes('id=4656'), 'בדיקה נכשלה: קישור חולין כו עא');
+            console.assert(getDafYomiPageUrl('Chullin.26b').includes('id=4657'), 'בדיקה נכשלה: קישור חולין כו עב');
+        };
+        runSmokeTests();
 
-    const [showText, setShowText] = useState(false);
-    const [activeTab, setActiveTab] = useState('gemara');
-    const [textContents, setTextContents] = useState({
-        gemara: [],
-        explanation: [],
-        rashi: [],
-        tosafot: [],
-        tanya_original: [],
-        scan_url: ''
-    });
+        function DafYomiApp() {
+            const [masterMode, setMasterMode] = useState('daf_yomi');
+            const [studyMode, setStudyMode] = useState('daily');
 
-    const [isTextLoading, setIsTextLoading] = useState(false);
-    const [currentActiveRef, setCurrentActiveRef] = useState('');
-    const [showHistoryModal, setShowHistoryModal] = useState(false);
-    const [scanError, setScanError] = useState(false);
-    const [isZoomed, setIsZoomed] = useState(false);
+            const [customTractate, setCustomTractate] = useState(TRACTATES[0].en);
+            const [customDaf, setCustomDaf] = useState(2);
+            const [customAmud, setCustomAmud] = useState('a');
 
-    const [showNotes, setShowNotes] = useState(false);
-    const [noteText, setNoteText] = useState('');
+            const [customTanyaSection, setCustomTanyaSection] = useState(TANYA_SECTIONS[0].en);
+            const [customTanyaChapter, setCustomTanyaChapter] = useState(1);
 
-    useEffect(() => { fetchDailyData(); }, [dateOffset]);
+            const [dateOffset, setDateOffset] = useState(0);
+            const [dateInfo, setDateInfo] = useState({ he: '', day: '', greg: '' });
+            const [isLoading, setIsLoading] = useState(true);
 
-    const getNoteKey = (ref = currentActiveRef) => `beit_midrash_note_${ref}`;
+            const [dafInfo, setDafInfo] = useState({ he: '', en: '', ref: '' });
+            const [isLearned, setIsLearned] = useState(false);
+            const [streak, setStreak] = useState(0);
 
-    const loadNoteForRef = (ref) => {
-        setNoteText(localStorage.getItem(getNoteKey(ref)) || '');
-    };
+            const [tanyaInfo, setTanyaInfo] = useState({ he: '', ref: '' });
+            const [isTanyaLearned, setIsTanyaLearned] = useState(false);
+            const [tanyaStreak, setTanyaStreak] = useState(0);
 
-    const saveNote = (value) => {
-        setNoteText(value);
-        if (currentActiveRef) {
-            localStorage.setItem(getNoteKey(), value);
-        }
-    };
+            const [showText, setShowText] = useState(false);
+            const [activeTab, setActiveTab] = useState('gemara');
+            const [textContents, setTextContents] = useState({ gemara: [], explanation: [], rashi: [], tosafot: [], tanya_original: [], scan_url: '' });
+            const [isTextLoading, setIsTextLoading] = useState(false);
+            const [currentActiveRef, setCurrentActiveRef] = useState('');
+            const [showHistoryModal, setShowHistoryModal] = useState(false);
 
-    const hasNote = noteText.trim().length > 0;
+            const [showNotes, setShowNotes] = useState(false);
+            const [noteText, setNoteText] = useState('');
+            const [hasNote, setHasNote] = useState(false);
 
-    const fetchDailyData = async () => {
-        setIsLoading(true);
-        try {
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + dateOffset);
-            const year = targetDate.getFullYear();
-            const month = targetDate.getMonth() + 1;
-            const day = targetDate.getDate();
+            useEffect(() => {
+                fetchDailyData();
+            }, [dateOffset]);
 
-            const sefariaRes = await fetch(`https://www.sefaria.org/api/calendars?year=${year}&month=${month}&day=${day}`);
-            const sefariaData = await sefariaRes.json();
+            const safeLocalGet = (key, fallback = '') => {
+                try { return localStorage.getItem(key) || fallback; }
+                catch (e) { return fallback; }
+            };
 
-            const dafItem = sefariaData.calendar_items.find(item => item.title.en === "Daf Yomi");
-            if (dafItem) setDafInfo({ he: dafItem.displayValue.he, en: dafItem.title.en, ref: dafItem.url });
+            const safeLocalSet = (key, value) => {
+                try { localStorage.setItem(key, value); }
+                catch (e) { console.warn('localStorage unavailable', e); }
+            };
 
-            const tanyaItem = sefariaData.calendar_items.find(item => item.title.en === "Tanya Yomi");
-            if (tanyaItem) setTanyaInfo({ he: `תניא - ${tanyaItem.displayValue.he}`, ref: tanyaItem.url });
+            const fetchDailyData = async () => {
+                setIsLoading(true);
+                try {
+                    const targetDate = new Date();
+                    targetDate.setDate(targetDate.getDate() + dateOffset);
+                    const year = targetDate.getFullYear();
+                    const month = targetDate.getMonth() + 1;
+                    const day = targetDate.getDate();
 
-            const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const hebcalRes = await fetch(`https://www.hebcal.com/converter?cfg=json&date=${dateString}&g2h=1&strict=1`);
-            const hebcalData = await hebcalRes.json();
+                    const sefariaRes = await fetch(`https://www.sefaria.org/api/calendars?year=${year}&month=${month}&day=${day}`);
+                    const sefariaData = await sefariaRes.json();
+                    const items = Array.isArray(sefariaData.calendar_items) ? sefariaData.calendar_items : [];
 
-            const formattedGregDate = targetDate.toLocaleDateString('he-IL');
+                    const dafItem = items.find(item => item.title && item.title.en === 'Daf Yomi');
+                    if (dafItem) {
+                        setDafInfo({
+                            he: dafItem.displayValue ? dafItem.displayValue.he : 'הדף היומי',
+                            en: 'Daf Yomi',
+                            ref: dafItem.url || ''
+                        });
+                    }
 
-            setDateInfo({
-                he: hebcalData.hebrew.replace(/[\u0591-\u05C7]/g, ""),
-                day: `יום ${['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'][targetDate.getDay()]}`,
-                greg: formattedGregDate
-            });
+                    const tanyaItem = items.find(item => item.title && item.title.en === 'Tanya Yomi');
+                    if (tanyaItem) {
+                        setTanyaInfo({
+                            he: `תניא - ${tanyaItem.displayValue ? tanyaItem.displayValue.he : ''}`,
+                            ref: tanyaItem.url || ''
+                        });
+                    }
 
-            setIsLearned(localStorage.getItem(`daf_learned_${formattedGregDate}`) === 'true');
-            setIsTanyaLearned(localStorage.getItem(`tanya_learned_${formattedGregDate}`) === 'true');
-            setStreak(parseInt(localStorage.getItem('daf_streak') || '0'));
-            setTanyaStreak(parseInt(localStorage.getItem('tanya_streak') || '0'));
-            setIsLoading(false);
-        } catch (e) {
-            console.error(e);
-            setIsLoading(false);
-        }
-    };
+                    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const hebcalRes = await fetch(`https://www.hebcal.com/converter?cfg=json&date=${dateString}&g2h=1&strict=1`);
+                    const hebcalData = await hebcalRes.json();
 
-    const fetchTextData = async (tabName, ref) => {
-        if (tabName === 'tanya_explanation') return;
+                    const formattedGregDate = targetDate.toLocaleDateString('he-IL');
+                    setDateInfo({
+                        he: (hebcalData.hebrew || '').replace(/[\u0591-\u05C7]/g, ''),
+                        day: `יום ${['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'][targetDate.getDay()]}`,
+                        greg: formattedGregDate
+                    });
 
-        setScanError(false);
-        setIsZoomed(false);
+                    setIsLearned(safeLocalGet(`daf_learned_${formattedGregDate}`) === 'true');
+                    setIsTanyaLearned(safeLocalGet(`tanya_learned_${formattedGregDate}`) === 'true');
+                    setStreak(parseInt(safeLocalGet('daf_streak', '0'), 10) || 0);
+                    setTanyaStreak(parseInt(safeLocalGet('tanya_streak', '0'), 10) || 0);
+                } catch (e) {
+                    console.error('fetchDailyData error', e);
+                    setDateInfo(prev => ({ ...prev, day: 'לא ניתן לטעון נתונים כרגע' }));
+                } finally {
+                    setIsLoading(false);
+                }
+            };
 
-        if (textContents[tabName]?.length > 0 && currentActiveRef === ref) return;
+            const resetTextForNewRef = () => {
+                setTextContents({ gemara: [], explanation: [], rashi: [], tosafot: [], tanya_original: [], scan_url: '' });
+            };
 
-        setIsTextLoading(true);
-        try {
-            const safeRef = ref.replace(/ /g, '_');
-            let url = '';
+            const fetchTextData = async (tabName, ref) => {
+                if (!ref && tabName !== 'scan') return;
+                if (tabName === 'tanya_explanation') return;
 
-            if (tabName === 'scan') {
-                let parts = safeRef.split('.');
-                let tractate = parts[0].replace(/_/g, '%20');
-                let page = parts[1] || '2a';
-
-                if (!page.includes('a') && !page.includes('b')) page += 'a';
-
-                const scanUrl = `https://images.sefaria.org/Talmud/Bavli/Vilna/${tractate}/${page}.jpg`;
-                setTextContents(prev => ({ ...prev, scan_url: scanUrl }));
-            } else {
-                switch (tabName) {
-                    case 'gemara':
-                        url = `https://www.sefaria.org/api/texts/${safeRef}`;
-                        break;
-                    case 'explanation':
-                        url = `https://www.sefaria.org/api/texts/Steinsaltz_on_${safeRef}`;
-                        break;
-                    case 'rashi':
-                        url = `https://www.sefaria.org/api/texts/Rashi_on_${safeRef}`;
-                        break;
-                    case 'tosafot':
-                        url = `https://www.sefaria.org/api/texts/Tosafot_on_${safeRef}`;
-                        break;
-                    case 'tanya_original':
-                        url = `https://www.sefaria.org/api/texts/${safeRef}`;
-                        break;
+                if (tabName === 'scan') {
+                    const scanUrl = getDafYomiPageUrl(ref || currentActiveRef);
+                    setTextContents(prev => ({ ...prev, scan_url: scanUrl }));
+                    return;
                 }
 
-                const res = await fetch(url);
-                const data = await res.json();
+                setIsTextLoading(true);
+                try {
+                    const safeRef = String(ref || '').replace(/ /g, '_');
+                    let url = '';
 
-                setTextContents(prev => ({
-                    ...prev,
-                    [tabName]: (Array.isArray(data.he) ? data.he.flat() : [data.he]).filter(Boolean)
-                }));
-            }
-        } catch (e) {
-            console.error(e);
+                    switch (tabName) {
+                        case 'gemara': url = `https://www.sefaria.org/api/texts/${safeRef}`; break;
+                        case 'explanation': url = `https://www.sefaria.org/api/texts/Steinsaltz_on_${safeRef}`; break;
+                        case 'rashi': url = `https://www.sefaria.org/api/texts/Rashi_on_${safeRef}`; break;
+                        case 'tosafot': url = `https://www.sefaria.org/api/texts/Tosafot_on_${safeRef}`; break;
+                        case 'tanya_original': url = `https://www.sefaria.org/api/texts/${safeRef}`; break;
+                        default: url = '';
+                    }
+
+                    if (!url) return;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    const raw = Array.isArray(data.he) ? data.he.flat(Infinity) : [data.he];
+                    const clean = raw.filter(Boolean);
+                    setTextContents(prev => ({ ...prev, [tabName]: clean }));
+                } catch (e) {
+                    console.error('fetchTextData error', e);
+                    setTextContents(prev => ({ ...prev, [tabName]: ['שגיאה בטעינת התוכן. נסה שוב מאוחר יותר.'] }));
+                } finally {
+                    setIsTextLoading(false);
+                }
+            };
+
+            const getNoteKey = (ref) => `beit_midrash_note_${ref}`;
+
+            const loadNoteForRef = (ref) => {
+                const savedNote = safeLocalGet(getNoteKey(ref), '');
+                setNoteText(savedNote);
+                setHasNote(savedNote.trim().length > 0);
+            };
+
+            const saveNoteForRef = (value) => {
+                setNoteText(value);
+                setHasNote(value.trim().length > 0);
+                if (currentActiveRef) safeLocalSet(getNoteKey(currentActiveRef), value);
+            };
+
+            const getCurrentRef = () => {
+                if (masterMode === 'daf_yomi') {
+                    return studyMode === 'daily' ? dafInfo.ref : `${customTractate}.${customDaf}${customAmud}`;
+                }
+                return studyMode === 'daily' ? tanyaInfo.ref : `${customTanyaSection} ${customTanyaChapter}`;
+            };
+
+            const handleEnterBeitMidrash = () => {
+                const ref = getCurrentRef();
+                if (!ref) return;
+
+                resetTextForNewRef();
+                setCurrentActiveRef(ref);
+                loadNoteForRef(ref);
+                setShowNotes(false);
+                setShowText(true);
+
+                const initialTab = masterMode === 'daf_yomi' ? 'gemara' : 'tanya_original';
+                setActiveTab(initialTab);
+                fetchTextData(initialTab, ref);
+            };
+
+            const handleTabClick = (tabId) => {
+                setActiveTab(tabId);
+                fetchTextData(tabId, currentActiveRef);
+            };
+
+            const handleToggleLearn = () => {
+                const key = masterMode === 'daf_yomi' ? `daf_learned_${dateInfo.greg}` : `tanya_learned_${dateInfo.greg}`;
+                const streakKey = masterMode === 'daf_yomi' ? 'daf_streak' : 'tanya_streak';
+                const isCurrent = masterMode === 'daf_yomi' ? isLearned : isTanyaLearned;
+                const newVal = !isCurrent;
+
+                if (masterMode === 'daf_yomi') setIsLearned(newVal);
+                else setIsTanyaLearned(newVal);
+
+                safeLocalSet(key, String(newVal));
+                const oldStreak = parseInt(safeLocalGet(streakKey, '0'), 10) || 0;
+                const newStreak = newVal ? oldStreak + 1 : Math.max(0, oldStreak - 1);
+                safeLocalSet(streakKey, String(newStreak));
+
+                if (masterMode === 'daf_yomi') setStreak(newStreak);
+                else setTanyaStreak(newStreak);
+
+                const histKey = masterMode === 'daf_yomi' ? 'daf_history' : 'tanya_history';
+                let hist = [];
+                try { hist = JSON.parse(safeLocalGet(histKey, '[]')) || []; }
+                catch (e) { hist = []; }
+
+                if (newVal) {
+                    hist = hist.filter(h => h.gregDate !== dateInfo.greg);
+                    hist.unshift({ gregDate: dateInfo.greg, heDate: dateInfo.he, dafName: masterMode === 'daf_yomi' ? dafInfo.he : tanyaInfo.he });
+                } else {
+                    hist = hist.filter(h => h.gregDate !== dateInfo.greg);
+                }
+                safeLocalSet(histKey, JSON.stringify(hist));
+            };
+
+            const handlePrevDaf = () => {
+                if (customAmud === 'b') setCustomAmud('a');
+                else if (Number(customDaf) > 2) { setCustomDaf(Number(customDaf) - 1); setCustomAmud('b'); }
+            };
+
+            const handleNextDaf = () => {
+                if (customAmud === 'a') setCustomAmud('b');
+                else if (Number(customDaf) < 175) { setCustomDaf(Number(customDaf) + 1); setCustomAmud('a'); }
+            };
+
+            const handlePrevTanya = () => {
+                if (Number(customTanyaChapter) > 1) setCustomTanyaChapter(Number(customTanyaChapter) - 1);
+            };
+
+            const handleNextTanya = () => {
+                const max = TANYA_SECTIONS.find(s => s.en === customTanyaSection)?.max || 53;
+                if (Number(customTanyaChapter) < max) setCustomTanyaChapter(Number(customTanyaChapter) + 1);
+            };
+
+            const getHistoryItems = () => {
+                const key = masterMode === 'daf_yomi' ? 'daf_history' : 'tanya_history';
+                try { return JSON.parse(safeLocalGet(key, '[]')) || []; }
+                catch (e) { return []; }
+            };
+
+            const learningTitle = masterMode === 'daf_yomi'
+                ? (studyMode === 'daily'
+                    ? dafInfo.he
+                    : `${TRACTATES.find(t => t.en === customTractate)?.he || ''} דף ${toGematria(customDaf)} ע${customAmud === 'a' ? 'א' : 'ב'}`)
+                : (studyMode === 'daily'
+                    ? tanyaInfo.he
+                    : `תניא - פרק ${toGematria(customTanyaChapter)}`);
+
+            return (
+                <div className="bg-white/40 shadow-2xl overflow-hidden sm:rounded-[2.5rem] flex flex-col h-full sm:h-[88vh] relative w-full glass-card border-none">
+                    <div className="bg-gradient-to-br from-violet-600 to-indigo-800 p-6 pt-12 pb-10 text-white text-center relative shrink-0 rounded-b-[3rem] shadow-2xl z-10">
+                        <div className="absolute top-6 left-6 bg-white/10 backdrop-blur-md rounded-2xl px-4 py-2 flex items-center gap-2 shadow-lg border border-white/20">
+                            <span className="text-2xl animate-pulse">🔥</span>
+                            <span className="font-black text-xl tracking-tighter">{masterMode === 'daf_yomi' ? streak : tanyaStreak}</span>
+                        </div>
+
+                        <button onClick={() => setShowHistoryModal(true)} className="absolute top-6 right-6 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl p-2.5 transition-all shadow-lg border border-white/20 active:scale-90" aria-label="פתח היסטוריה">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </button>
+
+                        <h1 className="text-3xl font-black mb-6 tracking-tight drop-shadow-md">בית המדרש</h1>
+
+                        <div className="flex justify-center gap-3 mb-6 p-1 bg-black/10 rounded-[1.5rem] backdrop-blur-sm max-w-[280px] mx-auto border border-white/10">
+                            <button onClick={() => { setMasterMode('daf_yomi'); setShowText(false); }} className={`flex-1 py-3 rounded-[1.2rem] text-sm font-bold transition-all ${masterMode === 'daf_yomi' ? 'bg-white text-violet-700 shadow-xl scale-105' : 'text-violet-100 hover:text-white'}`}>גמרא</button>
+                            <button onClick={() => { setMasterMode('tanya'); setShowText(false); }} className={`flex-1 py-3 rounded-[1.2rem] text-sm font-bold transition-all ${masterMode === 'tanya' ? 'bg-white text-violet-700 shadow-xl scale-105' : 'text-violet-100 hover:text-white'}`}>תניא</button>
+                        </div>
+
+                        <div className="flex bg-white/10 p-1 rounded-xl max-w-[160px] mx-auto">
+                            <button onClick={() => setStudyMode('daily')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${studyMode === 'daily' ? 'bg-white/20 text-white' : 'text-violet-200 hover:text-white'}`}>יומי</button>
+                            <button onClick={() => setStudyMode('custom')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${studyMode === 'custom' ? 'bg-white/20 text-white' : 'text-violet-200 hover:text-white'}`}>אישי</button>
+                        </div>
+                    </div>
+
+                    <div className="p-8 text-center overflow-y-auto grow custom-scrollbar flex flex-col justify-center animate-fade-in z-0">
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center gap-4 text-violet-700 font-black">
+                                <div className="w-14 h-14 border-4 border-violet-200 border-b-violet-600 rounded-full animate-spin"></div>
+                                טוען לימוד יומי...
+                            </div>
+                        ) : studyMode === 'daily' ? (
+                            <div className="space-y-8">
+                                <div className="flex flex-col items-center">
+                                    <div className="flex items-center justify-between w-full bg-violet-50/50 rounded-3xl p-4 border border-violet-100/50 shadow-sm">
+                                        <button onClick={() => setDateOffset(prev => prev - 1)} className="p-3 bg-white text-violet-600 rounded-2xl shadow-sm hover:scale-110 active:scale-90 transition-transform" aria-label="יום קודם">
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
+                                        </button>
+                                        <div className="text-center">
+                                            <span className="block text-xl font-black text-violet-900">{dateInfo.day}</span>
+                                            <span className="block text-sm font-bold text-violet-500">{dateInfo.he}</span>
+                                        </div>
+                                        <button onClick={() => setDateOffset(prev => prev + 1)} className="p-3 bg-white text-violet-600 rounded-2xl shadow-sm hover:scale-110 active:scale-90 transition-transform" aria-label="יום הבא">
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"></path></svg>
+                                        </button>
+                                    </div>
+                                    {dateOffset !== 0 && <button onClick={() => setDateOffset(0)} className="mt-4 text-xs font-black text-violet-600 hover:underline">חזור להיום</button>}
+                                </div>
+
+                                <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-700 to-indigo-900 leading-tight">
+                                    {learningTitle || 'אין נתונים'}
+                                </h2>
+
+                                <button onClick={handleToggleLearn} className={`w-full py-5 rounded-3xl text-2xl font-black transition-all shadow-xl flex items-center justify-center gap-4 transform active:scale-95 ${(masterMode === 'daf_yomi' ? isLearned : isTanyaLearned) ? 'bg-green-500 text-white' : 'bg-white text-violet-700 border-2 border-violet-100 hover:bg-violet-50'}`}>
+                                    {(masterMode === 'daf_yomi' ? isLearned : isTanyaLearned) ? 'למדתי היום!' : 'סמן כנלמד'}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-6 bg-violet-50/50 p-6 rounded-[2rem] border border-violet-100">
+                                <h3 className="text-lg font-bold text-violet-800">בחירת לימוד חופשי:</h3>
+                                {masterMode === 'daf_yomi' ? (
+                                    <>
+                                        <select value={customTractate} onChange={e => setCustomTractate(e.target.value)} className="w-full bg-white border-2 border-violet-200 rounded-xl px-4 py-3 text-lg font-bold text-violet-700 outline-none text-center appearance-none shadow-sm">
+                                            {TRACTATES.map(t => <option key={t.en} value={t.en}>{t.he}</option>)}
+                                        </select>
+                                        <div className="flex gap-2 items-center w-full">
+                                            <button onClick={handlePrevDaf} className="p-3 bg-white border border-violet-200 text-violet-600 rounded-xl hover:bg-violet-100 shadow-sm active:scale-90 transition-transform" aria-label="דף קודם">
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
+                                            </button>
+                                            <select value={customDaf} onChange={e => setCustomDaf(Number(e.target.value))} className="flex-1 bg-white border-2 border-violet-200 rounded-xl p-3 text-center text-lg font-black text-violet-700 appearance-none shadow-sm outline-none">
+                                                {Array.from({ length: 174 }, (_, i) => i + 2).map(n => <option key={n} value={n}>דף {toGematria(n)}</option>)}
+                                            </select>
+                                            <select value={customAmud} onChange={e => setCustomAmud(e.target.value)} className="flex-1 bg-white border-2 border-violet-200 rounded-xl p-3 text-center text-lg font-bold text-violet-700 appearance-none shadow-sm outline-none">
+                                                <option value="a">עמוד א'</option>
+                                                <option value="b">עמוד ב'</option>
+                                            </select>
+                                            <button onClick={handleNextDaf} className="p-3 bg-white border border-violet-200 text-violet-600 rounded-xl hover:bg-violet-100 shadow-sm active:scale-90 transition-transform" aria-label="דף הבא">
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"></path></svg>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="flex flex-col items-start w-full">
+                                            <label className="text-sm font-semibold text-violet-500 mb-1 px-2">חלק בתניא</label>
+                                            <select value={customTanyaSection} onChange={e => { setCustomTanyaSection(e.target.value); setCustomTanyaChapter(1); }} className="w-full bg-white border-2 border-violet-200 rounded-xl px-4 py-3 text-lg font-bold text-violet-700 outline-none text-center appearance-none shadow-sm">
+                                                {TANYA_SECTIONS.map(s => <option key={s.en} value={s.en}>{s.he}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="flex gap-2 items-center w-full mt-2">
+                                            <button onClick={handlePrevTanya} className="p-3 bg-white border border-violet-200 text-violet-600 rounded-xl hover:bg-violet-100 shadow-sm active:scale-90 transition-transform" aria-label="פרק קודם">
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
+                                            </button>
+                                            <select value={customTanyaChapter} onChange={e => setCustomTanyaChapter(Number(e.target.value))} className="w-full bg-white border-2 border-violet-200 rounded-xl p-3 text-center text-lg font-black text-violet-700 appearance-none shadow-sm outline-none">
+                                                {Array.from({ length: TANYA_SECTIONS.find(s => s.en === customTanyaSection)?.max || 53 }, (_, i) => i + 1).map(n => <option key={n} value={n}>פרק {toGematria(n)}</option>)}
+                                            </select>
+                                            <button onClick={handleNextTanya} className="p-3 bg-white border border-violet-200 text-violet-600 rounded-xl hover:bg-violet-100 shadow-sm active:scale-90 transition-transform" aria-label="פרק הבא">
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"></path></svg>
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        <button onClick={handleEnterBeitMidrash} disabled={isLoading || !getCurrentRef()} className="mt-8 bg-gradient-to-br from-violet-600 to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full py-5 rounded-[2rem] text-xl font-black shadow-2xl hover:shadow-violet-300 transition-all flex justify-center items-center gap-3 group active:scale-95">
+                            היכנס לבית המדרש
+                            <svg className="w-6 h-6 group-hover:translate-x-[-5px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M11 19l-7-7 7-7"></path></svg>
+                        </button>
+                    </div>
+
+                    {showText && (
+                        <div className="fixed inset-0 bg-white z-[100] flex flex-col animate-fade-in">
+                            <div className="bg-violet-900 p-4 pt-10 text-white flex items-center justify-between shrink-0 shadow-2xl gap-3">
+                                <h2 className="text-xl font-black flex items-center gap-3 min-w-0">
+                                    <span className="p-2 bg-white/10 rounded-xl shrink-0">📚</span>
+                                    <span className="truncate">{learningTitle}</span>
+                                </h2>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button onClick={() => setShowNotes(prev => !prev)} className="relative bg-white/10 hover:bg-white/20 text-white rounded-2xl py-2 px-4 font-black text-sm border border-white/20 transition-all active:scale-90">
+                                        הערות
+                                        {hasNote && <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-300 rounded-full border-2 border-violet-900"></span>}
+                                    </button>
+                                    <button onClick={() => setShowText(false)} className="bg-white/10 hover:bg-white/20 text-white rounded-2xl py-2 px-4 font-black text-sm border border-white/20 transition-all active:scale-90">סגור</button>
+                                </div>
+                            </div>
+
+                            <div className="flex bg-violet-50 shrink-0 overflow-x-auto custom-scrollbar border-b border-violet-100">
+                                {(masterMode === 'daf_yomi'
+                                    ? [{ id: 'scan', label: 'צורת הדף' }, { id: 'gemara', label: 'גמרא' }, { id: 'explanation', label: 'ביאור' }, { id: 'rashi', label: 'רש\"י' }, { id: 'tosafot', label: 'תוספות' }]
+                                    : [{ id: 'tanya_original', label: 'תניא' }, { id: 'tanya_explanation', label: 'ביאור' }]
+                                ).map(tab => (
+                                    <button key={tab.id} onClick={() => handleTabClick(tab.id)} className={`flex-1 min-w-[100px] py-4 text-sm font-black transition-all ${activeTab === tab.id ? 'bg-white text-violet-700 border-b-4 border-violet-600' : 'text-violet-400 hover:text-violet-600'}`}>
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {showNotes && (
+                                <div className="bg-yellow-50 border-b border-yellow-200 p-4 shrink-0 animate-fade-in">
+                                    <label className="block text-right text-sm font-black text-yellow-800 mb-2">ההערה שלי לדף הזה</label>
+                                    <textarea
+                                        value={noteText}
+                                        onChange={(e) => saveNoteForRef(e.target.value)}
+                                        placeholder="כתוב כאן מחשבה, קושיה או סיכום..."
+                                        className="w-full min-h-[120px] resize-none rounded-2xl border-2 border-yellow-200 bg-white p-4 text-right text-lg leading-relaxed outline-none focus:border-yellow-400 shadow-sm"
+                                        dir="rtl"
+                                    />
+                                    <p className="text-xs font-bold text-yellow-700 mt-2 text-right">נשמר אוטומטית</p>
+                                </div>
+                            )}
+
+                            <div className="flex-1 overflow-hidden bg-white">
+                                {isTextLoading ? (
+                                    <div className="flex flex-col justify-center items-center h-full gap-5">
+                                        <div className="w-16 h-16 border-4 border-violet-200 border-b-violet-600 rounded-full animate-spin"></div>
+                                        <p className="font-black text-violet-400">מושך את התוכן...</p>
+                                    </div>
+                                ) : activeTab === 'scan' ? (
+                                    <div className="portal-card custom-scrollbar">
+                                        <div className="daf-paper-preview p-7 flex flex-col justify-between text-center">
+                                            <div>
+                                                <div className="text-5xl mb-5">📄</div>
+                                                <h3 className="text-3xl font-black text-violet-950 mb-3">צורת הדף</h3>
+                                                <p className="text-lg font-bold text-violet-700 leading-relaxed">לצפייה בצורת הדף, פתח את הדף המתאים בפורטל הדף היומי.</p>
+                                                <p className="text-sm font-bold text-violet-400 mt-4 leading-relaxed">פתיחה חיצונית יציבה יותר מהטמעה בתוך האפליקציה.</p>
+                                            </div>
+
+                                            <div className="space-y-3 mt-8">
+                                                <a href={textContents.scan_url || getDafYomiPageUrl(currentActiveRef)} target="_blank" rel="noopener noreferrer" className="block w-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white px-6 py-5 rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all">
+                                                    פתח בפורטל הדף היומי
+                                                </a>
+                                                <button onClick={() => fetchTextData('scan', currentActiveRef)} className="w-full bg-white text-violet-700 border-2 border-violet-100 px-6 py-4 rounded-[1.5rem] font-black text-base shadow-sm active:scale-95 transition-all">
+                                                    רענן קישור
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : activeTab === 'tanya_explanation' ? (
+                                    <div className="flex flex-col justify-center items-center h-full gap-6 text-center p-8 bg-violet-50/50">
+                                        <span className="text-7xl mb-2 drop-shadow-md">💡</span>
+                                        <h3 className="text-3xl font-black text-violet-900 mb-2">ביאור התניא</h3>
+                                        <p className="text-xl text-violet-700 font-medium max-w-md leading-relaxed">
+                                            בשל זכויות יוצרים, ביאור הרב שטיינזלץ לספר התניא טרם שוחרר למאגר הפתוח.
+                                            <br/><br/>תוכלו ליהנות מהביאור המלא לצד שיעורי שמע ווידאו באתר הרשמי של חב"ד.
+                                        </p>
+                                        <a href="https://he.chabad.org/dailystudy/tanya.htm" target="_blank" rel="noopener noreferrer" className="mt-6 bg-gradient-to-br from-violet-600 to-indigo-700 text-white px-8 py-5 rounded-[2rem] font-black text-xl shadow-xl hover:shadow-violet-400 hover:scale-105 transition-all">
+                                            לפתיחת הביאור באתר חב"ד
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <div className="p-8 text-right overflow-y-auto h-full custom-scrollbar leading-relaxed">
+                                        <div className="max-w-3xl mx-auto sefaria-text" dir="rtl">
+                                            {textContents[activeTab]?.length ? textContents[activeTab].map((p, i) => (
+                                                <p key={i} className="mb-8 p-6 bg-white rounded-3xl border border-violet-50 shadow-sm" dangerouslySetInnerHTML={{ __html: p }} />
+                                            )) : (
+                                                <div className="text-center text-violet-400 font-black mt-20">אין תוכן להצגה כרגע.</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {showHistoryModal && (
+                        <div className="absolute inset-0 bg-white z-[101] flex flex-col animate-fade-in">
+                            <div className="bg-violet-700 p-6 pt-10 text-white flex items-center justify-between shadow-xl">
+                                <h2 className="text-2xl font-black underline decoration-violet-300">ההיסטוריה שלי</h2>
+                                <button onClick={() => setShowHistoryModal(false)} className="bg-white/10 p-2 rounded-xl" aria-label="סגור היסטוריה">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto grow custom-scrollbar bg-violet-50/30">
+                                {getHistoryItems().length ? getHistoryItems().map((h, i) => (
+                                    <div key={`${h.gregDate}_${i}`} className="bg-white p-5 rounded-3xl border border-violet-100 shadow-sm mb-4 flex justify-between items-center">
+                                        <div className="text-right">
+                                            <span className="block font-black text-violet-800 text-lg">{h.dafName}</span>
+                                            <span className="text-sm font-bold text-violet-400">{h.heDate}</span>
+                                        </div>
+                                        <span className="text-2xl">✅</span>
+                                    </div>
+                                )) : (
+                                    <div className="text-center text-violet-400 font-black mt-20">עדיין אין פריטים בהיסטוריה.</div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
         }
 
-        setIsTextLoading(false);
-    };
-
-    const handleEnterBeitMidrash = () => {
-        const ref = masterMode === 'daf_yomi'
-            ? (studyMode === 'daily' ? dafInfo.ref : `${customTractate}.${customDaf}${customAmud}`)
-            : (studyMode === 'daily' ? tanyaInfo.ref : `${customTanyaSection} ${customTanyaChapter}`);
-
-        setCurrentActiveRef(ref);
-        loadNoteForRef(ref);
-        setShowNotes(false);
-        setShowText(true);
-
-        const initialTab = masterMode === 'daf_yomi' ? 'gemara' : 'tanya_original';
-        setActiveTab(initialTab);
-        fetchTextData(initialTab, ref);
-    };
-
-    const handleToggleLearn = () => {
-        const key = masterMode === 'daf_yomi' ? `daf_learned_${dateInfo.greg}` : `tanya_learned_${dateInfo.greg}`;
-        const streakKey = masterMode === 'daf_yomi' ? 'daf_streak' : 'tanya_streak';
-        const isCurrent = masterMode === 'daf_yomi' ? isLearned : isTanyaLearned;
-
-        const newVal = !isCurrent;
-
-        if (masterMode === 'daf_yomi') setIsLearned(newVal);
-        else setIsTanyaLearned(newVal);
-
-        localStorage.setItem(key, newVal.toString());
-
-        const newStreak = newVal
-            ? (parseInt(localStorage.getItem(streakKey) || '0') + 1)
-            : Math.max(0, parseInt(localStorage.getItem(streakKey) || '0') - 1);
-
-        localStorage.setItem(streakKey, newStreak.toString());
-
-        if (masterMode === 'daf_yomi') setStreak(newStreak);
-        else setTanyaStreak(newStreak);
-
-        const histKey = masterMode === 'daf_yomi' ? 'daf_history' : 'tanya_history';
-        let hist = JSON.parse(localStorage.getItem(histKey) || '[]');
-
-        if (newVal) {
-            hist.unshift({
-                gregDate: dateInfo.greg,
-                heDate: dateInfo.he,
-                dafName: masterMode === 'daf_yomi' ? dafInfo.he : tanyaInfo.he
-            });
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(<DafYomiApp />);
         } else {
-            hist = hist.filter(h => h.gregDate !== dateInfo.greg);
+            console.error('Root element not found');
         }
-
-        localStorage.setItem(histKey, JSON.stringify(hist));
-    };
-
-    const handlePrevDaf = () => {
-        if (customAmud === 'b') setCustomAmud('a');
-        else if (customDaf > 2) {
-            setCustomDaf(Number(customDaf) - 1);
-            setCustomAmud('b');
-        }
-    };
-
-    const handleNextDaf = () => {
-        if (customAmud === 'a') setCustomAmud('b');
-        else if (customDaf < 175) {
-            setCustomDaf(Number(customDaf) + 1);
-            setCustomAmud('a');
-        }
-    };
-
-    const handlePrevTanya = () => {
-        if (customTanyaChapter > 1) setCustomTanyaChapter(Number(customTanyaChapter) - 1);
-    };
-
-    const handleNextTanya = () => {
-        const max = TANYA_SECTIONS.find(s => s.en === customTanyaSection)?.max || 53;
-        if (customTanyaChapter < max) setCustomTanyaChapter(Number(customTanyaChapter) + 1);
-    };
-
-    return (
-        <div className="bg-white/40 shadow-2xl overflow-hidden sm:rounded-[2.5rem] flex flex-col h-full sm:h-[88vh] relative w-full glass-card border-none">
-
-            <div className="bg-gradient-to-br from-violet-600 to-indigo-800 p-6 pt-12 pb-10 text-white text-center relative shrink-0 rounded-b-[3rem] shadow-2xl z-10">
-                <div className="absolute top-6 left-6 bg-white/10 backdrop-blur-md rounded-2xl px-4 py-2 flex items-center gap-2 shadow-lg border border-white/20">
-                    <span className="text-2xl animate-pulse">🔥</span>
-                    <span className="font-black text-xl tracking-tighter">{masterMode === 'daf_yomi' ? streak : tanyaStreak}</span>
-                </div>
-
-                <button onClick={() => setShowHistoryModal(true)} className="absolute top-6 right-6 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl p-2.5 transition-all shadow-lg border border-white/20 active:scale-90">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                </button>
-
-                <h1 className="text-3xl font-black mb-6 tracking-tight drop-shadow-md">בית המדרש 🏛️</h1>
-
-                <div className="flex justify-center gap-3 mb-6 p-1 bg-black/10 rounded-[1.5rem] backdrop-blur-sm max-w-[280px] mx-auto border border-white/10">
-                    <button onClick={() => { setMasterMode('daf_yomi'); setShowText(false); }} className={`flex-1 py-3 rounded-[1.2rem] text-sm font-bold transition-all ${masterMode === 'daf_yomi' ? 'bg-white text-violet-700 shadow-xl scale-105' : 'text-violet-100 hover:text-white'}`}>גמרא</button>
-                    <button onClick={() => { setMasterMode('tanya'); setShowText(false); }} className={`flex-1 py-3 rounded-[1.2rem] text-sm font-bold transition-all ${masterMode === 'tanya' ? 'bg-white text-violet-700 shadow-xl scale-105' : 'text-violet-100 hover:text-white'}`}>תניא</button>
-                </div>
-
-                <div className="flex bg-white/10 p-1 rounded-xl max-w-[160px] mx-auto">
-                    <button onClick={() => setStudyMode('daily')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${studyMode === 'daily' ? 'bg-white/20 text-white' : 'text-violet-200 hover:text-white'}`}>יומי</button>
-                    <button onClick={() => setStudyMode('custom')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${studyMode === 'custom' ? 'bg-white/20 text-white' : 'text-violet-200 hover:text-white'}`}>אישי</button>
-                </div>
-            </div>
-
-            <div className="p-8 text-center overflow-y-auto grow custom-scrollbar flex flex-col justify-center animate-fade-in z-0">
-                {studyMode === 'daily' ? (
-                    <div className="space-y-8">
-                        <div className="flex flex-col items
+    </script>
+</body>
+</html>
