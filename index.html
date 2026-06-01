@@ -15,7 +15,7 @@
   --ink:#241015;
   --muted:#8b6f6c;
   --line:#f0d8c7;
-  --navy:#6d1d2b;
+  --navy:#6d1d3b;
   --navy2:#a43a4f;
   --gold:#ffb84d;
   --gold2:#ffe1a6;
@@ -89,7 +89,14 @@ button{border:0;cursor:pointer}
 .mode-tab{height:44px;border-radius:16px;background:transparent;color:rgba(255,255,255,.72);font-size:16px;font-weight:900;transition:.18s;text-align:center}.mode-tab.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);box-shadow:0 10px 22px rgba(214,178,94,.24)}.mode-tab.history{padding:0;color:rgba(255,255,255,.82);border:1px solid rgba(241,215,138,.20)}
 .today-panel{position:relative;z-index:1;width:100%;max-width:430px;margin:16px auto 0;padding:16px;border-radius:26px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);text-align:center}
 .date-line{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:10px}.date-nav-btn{width:44px;height:44px;border-radius:16px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.12);color:white;font-size:22px}.date-center{text-align:center;min-width:0}.date-center .hdate{font-family:'Assistant',sans-serif;color:#fff;font-size:20px;font-weight:900}.date-center .gdate{font-size:13px;color:rgba(255,255,255,.68);margin-top:3px}.calendar-toggle{margin:14px auto 0;width:100%;max-width:260px;height:40px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);color:var(--gold2);font-weight:900;font-size:14px;text-align:center}
-.main{width:100%;max-width:430px;flex:1;padding:18px 14px 22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:16px;text-align:center}.hidden{display:none!important}.fade{animation:fade .24s ease-out}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.main{width:100%;max-width:430px;flex:1;padding:18px 14px 22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:16px;text-align:center}
+.gemara-combo .combo-segment{display:flex;flex-direction:column;gap:10px;text-align:right}
+.combo-label{display:inline-flex;align-self:flex-start;background:rgba(92,26,27,.10);color:var(--primary);border:1px solid rgba(92,26,27,.14);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:900;line-height:1}
+.combo-label-biur{background:rgba(212,168,79,.18);color:#7a4f00;border-color:rgba(212,168,79,.28)}
+.combo-gemara{font-weight:800;color:var(--primary)}
+.combo-biur{color:var(--ink2);line-height:1.9}
+
+.hidden{display:none!important}.fade{animation:fade .24s ease-out}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .full-loader,.loader{width:100%;min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:36px;color:var(--muted);font-weight:900;text-align:center}.spin{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 #mainBody{width:100%;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
 .study-card{width:100%;background:var(--card);border:1px solid rgba(214,178,94,.35);border-radius:30px;box-shadow:var(--soft);overflow:hidden;text-align:center}.study-card-header{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:16px;background:linear-gradient(180deg,#fff8ef,#fff0e3);border-bottom:1px solid var(--line);text-align:center}.study-card-label{font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.10em}.badges{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}.badge{font-size:12px;padding:5px 12px;border-radius:999px;font-weight:900}.badge-gemara{background:rgba(164,58,79,.13);color:var(--blue)}.badge-tanya{background:rgba(36,115,77,.12);color:var(--green)}.badge-daily{background:rgba(214,178,94,.18);color:#73540d}.badge-custom{background:rgba(109,29,43,.10);color:var(--navy2)}.study-card-body{padding:18px;text-align:center}.study-mode-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#fff0e5;border:1px solid var(--line);border-radius:18px;padding:5px;margin:0 auto 16px;max-width:360px}.study-mode-btn{height:42px;border-radius:14px;background:transparent;color:var(--muted);font-size:15px;font-weight:900;text-align:center}.study-mode-btn.active{background:white;color:var(--ink);box-shadow:0 8px 18px rgba(109,29,43,.08)}
@@ -313,13 +320,18 @@ function calcStreak(type){
   while(isLearned(cur,type)){count++;cur=addDaysKey(cur,-1)}
   return count;
 }
-function getDafYomiId(tractateEn,daf,amud){const start=TRACTATE_ID_STARTS[tractateEn];if(!start||daf<2)return null;return start+(daf-2)*2+(amud==='b'?1:0)}
-function getDafYomiUrl(tractateEn,daf,amud){
-  const id=getDafYomiId(tractateEn,daf,amud||'a');
-  return id?`https://daf-yomi.com/DafYomi_Page.aspx?vt=1&id=${id}`:'https://daf-yomi.com/';
+function getDafYomiPageId(tractateEn,daf){
+  // פורטל הדף היומי משתמש ב-id לפי דף שלם, לא לפי עמוד א/ב.
+  // דוגמה: ברכות ב = 1, ברכות כג = 22, שבת כג = 85.
+  const idx=TRACTATES.findIndex(t=>t.en===tractateEn);
+  if(idx<0||daf<2)return null;
+  let start=1;
+  for(let i=0;i<idx;i++) start += (TRACTATES[i].daf-1);
+  return start+(daf-2);
 }
 function getDafYomiPortalUrl(tractateEn,daf,amud){
-  return getDafYomiUrl(tractateEn,daf,amud);
+  const id=getDafYomiPageId(tractateEn,daf);
+  return id?`https://daf-yomi.com/dafyomi.aspx?id=${id}`:'https://daf-yomi.com/dafyomi.aspx';
 }
 function normalizeDafRef(ref){
   if(!ref)return '';
@@ -351,9 +363,13 @@ function tanyaUrlForCurrent(){
   if(studyMode==='daily')return 'https://he.chabad.org/dailystudy/tanya.htm';
   return `https://www.sefaria.org/${encodeURIComponent(tanyaRef(customSectionEn,customChapter))}?lang=he`;
 }
+function flattenTextArray(value){
+  const arr=Array.isArray(value)?value.flat(Infinity):[value];
+  return arr.filter(x=>typeof x==='string'&&x.trim());
+}
 function getHebTextArray(data){
   const candidates=[data && data.he, data && data.text, data && data.heRefText];
-  for(const c of candidates){const arr=Array.isArray(c)?c.flat(Infinity):[c];const out=arr.filter(x=>typeof x==='string'&&x.trim());if(out.length)return out}
+  for(const c of candidates){const out=flattenTextArray(c);if(out.length)return out}
   return [];
 }
 function escapeHTML(s){return String(s).replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]))}
@@ -518,16 +534,29 @@ async function buildTabs(){
 }
 function switchTab(tabId){activeTab=tabId;document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('tab_'+tabId);if(btn)btn.classList.add('active');loadTab(tabId)}
 
-async function fetchSefariaParagraphs(apiRef){
+async function fetchSefariaData(apiRef){
   const txt=await cachedText(`https://www.sefaria.org/api/texts/${encodeURIComponent(apiRef)}`);
   if(!txt.trim()||txt.trim().startsWith('<'))throw new Error('לא התקבל JSON');
-  const data=JSON.parse(txt);
+  return JSON.parse(txt);
+}
+async function fetchSefariaParagraphs(apiRef){
+  const data=await fetchSefariaData(apiRef);
   const paragraphs=getHebTextArray(data);
   if(!paragraphs.length)throw new Error('אין תוכן');
   return paragraphs;
 }
 function renderParagraphs(title,paragraphs){
   return `<div class="gemara-text" dir="rtl"><div class="section-title">${escapeHTML(title)}</div>${paragraphs.map(p=>`<p>${p}</p>`).join('')}</div>`;
+}
+function renderGemaraWithBiur(gemaraParts,biurParts){
+  const max=Math.max(gemaraParts.length,biurParts.length);
+  const rows=[];
+  for(let i=0;i<max;i++){
+    const g=gemaraParts[i]||'';
+    const b=biurParts[i]||'';
+    rows.push(`<p class="combo-segment">${g?`<span class="combo-label">גמרא</span><span class="combo-gemara">${g}</span>`:''}${b?`<span class="combo-label combo-label-biur">ביאור</span><span class="combo-biur">${b}</span>`:''}</p>`);
+  }
+  return `<div class="gemara-text gemara-combo" dir="rtl"><div class="section-title">גמרא - ביאור</div>${rows.join('')}</div>`;
 }
 async function loadTab(tabId){
   const content=document.getElementById('tabContent');
@@ -538,16 +567,17 @@ async function loadTab(tabId){
   const baseRef=normalizeDafRef(overlayRef);
   try{
     if(tab.kind==='combo'){
-      let html='';
-      const gemara=await fetchSefariaParagraphs(baseRef);
-      html+=renderParagraphs('גמרא',gemara);
+      const gemaraData=await fetchSefariaData(baseRef);
+      const gemara=flattenTextArray(gemaraData.he||gemaraData.text);
+      if(!gemara.length)throw new Error('אין גמרא');
+      let biur=[];
       try{
-        const biur=await fetchSefariaParagraphs(`Steinsaltz_on_${baseRef}`);
-        html+=renderParagraphs('ביאור',biur);
+        const biurData=await fetchSefariaData(`Steinsaltz_on_${baseRef}`);
+        biur=flattenTextArray(biurData.he||biurData.text);
       }catch(e){
-        html+=`<div class="portal-card" style="min-height:auto"><div class="portal-box"><div class="portal-title">ביאור</div><div class="portal-desc">לא נמצא ביאור זמין לדף הזה בתוך ספריא.</div></div></div>`;
+        biur=[];
       }
-      content.innerHTML=html;
+      content.innerHTML=biur.length?renderGemaraWithBiur(gemara,biur):renderParagraphs('גמרא - ביאור',gemara);
       return;
     }
     const apiRef=`${tab.prefix}${baseRef}`;
