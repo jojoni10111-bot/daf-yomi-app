@@ -1,725 +1,1302 @@
-<!DOCTYPE html><html lang="he" dir="rtl"><head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>בית המדרש הדיגיטלי</title>  <script src="https://cdn.tailwindcss.com"></script>  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&family=Heebo:wght@300;400;700;900&display=swap');:root {
-  --deep-purple: #4c1d95;
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>בית המדרש הדיגיטלי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Noto+Serif+Hebrew:wght@300;400;600;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1a0a2e;
+  --ink2:#3d2b5e;
+  --ink3:#6b4f8c;
+  --gold:#c9a227;
+  --gold2:#e8c84a;
+  --gold3:#f5e89a;
+  --parchment:#faf6ee;
+  --parchment2:#f0e8d4;
+  --parchment3:#e4d5b8;
+  --cream:#fff9f0;
+  --red:#8b1a1a;
+  --green:#1a5c3a;
+  --blue:#1a3a7c;
+  --radius:16px;
+  --shadow:0 4px 32px rgba(26,10,46,0.18);
+}
+body{
+  font-family:'Frank Ruhl Libre',serif;
+  background:var(--parchment);
+  min-height:100vh;
+  direction:rtl;
+  color:var(--ink);
+  overflow-x:hidden;
 }
 
-body {
-  font-family: 'Assistant', sans-serif;
-  background: linear-gradient(135deg, #f5f3ff 0%, #ddd6fe 100%);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #8b5cf6; border-radius: 10px; }
-
-.sefaria-text { line-height: 2.1; font-size: 1.2rem; }
-.sefaria-text b { color: var(--deep-purple); font-weight: 800; border-bottom: 1px dashed #ddd6fe; }
-
-.animate-fade-in { animation: fadeIn 0.35s ease-out; }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.portal-card {
-  min-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px;
+/* BG texture */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;
   background:
-    radial-gradient(circle at top, rgba(139,92,246,0.18), transparent 35%),
-    linear-gradient(135deg, #f8f5ef 0%, #efe2c6 100%);
+    radial-gradient(ellipse at 20% 10%, rgba(201,162,39,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(139,26,26,0.08) 0%, transparent 50%),
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(26,10,46,0.04) 39px,rgba(26,10,46,0.04) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(26,10,46,0.03) 79px,rgba(26,10,46,0.03) 80px);
+  pointer-events:none;
 }
 
-.paper-card {
-  width: min(410px, 92vw);
-  min-height: 430px;
-  border-radius: 28px;
-  background:
-    linear-gradient(rgba(255,255,255,0.82), rgba(255,255,255,0.82)),
-    repeating-linear-gradient(0deg, rgba(76,29,149,0.10) 0px, rgba(76,29,149,0.10) 1px, transparent 1px, transparent 22px),
-    repeating-linear-gradient(90deg, rgba(76,29,149,0.08) 0px, rgba(76,29,149,0.08) 1px, transparent 1px, transparent 42px);
-  box-shadow: 0 25px 60px rgba(76,29,149,0.25);
-  border: 1px solid rgba(120,83,30,0.18);
+#app{position:relative;z-index:1;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+
+/* HEADER */
+.header{
+  background:linear-gradient(160deg, var(--ink) 0%, var(--ink2) 100%);
+  padding:20px 20px 0;
+  border-bottom:3px solid var(--gold);
+  position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(201,162,39,0.04) 20px,rgba(201,162,39,0.04) 21px);
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative;z-index:1;}
+.logo{
+  font-family:'Noto Serif Hebrew',serif;
+  font-size:22px;font-weight:900;
+  color:var(--gold2);
+  letter-spacing:0.02em;
+  text-shadow:0 2px 8px rgba(0,0,0,0.4);
+}
+.logo span{color:white;font-weight:300;}
+.streak-badge{
+  background:rgba(201,162,39,0.2);
+  border:1px solid rgba(201,162,39,0.4);
+  border-radius:20px;padding:6px 14px;
+  display:flex;align-items:center;gap:6px;
+  color:var(--gold2);font-size:18px;font-weight:700;
+}
+.streak-badge svg{width:18px;height:18px;fill:var(--gold2);}
+
+/* MODE TABS */
+.mode-tabs{
+  display:flex;gap:4px;background:rgba(255,255,255,0.07);
+  border-radius:14px;padding:4px;margin-bottom:0;position:relative;z-index:1;
+}
+.mode-tab{
+  flex:1;padding:10px 8px;border:none;cursor:pointer;
+  border-radius:10px;font-family:'Frank Ruhl Libre',serif;
+  font-size:15px;font-weight:600;transition:all 0.2s;
+  color:rgba(255,255,255,0.5);background:transparent;
+}
+.mode-tab.active{
+  background:var(--gold);color:var(--ink);
+  font-weight:700;box-shadow:0 2px 12px rgba(201,162,39,0.4);
 }
 
-</style></head><body class="min-h-screen flex items-center justify-center p-0 sm:p-4">
+/* CALENDAR STRIP */
+.cal-strip{
+  padding:0 20px;margin-top:0;
+  background:linear-gradient(180deg, var(--ink2) 0%, var(--ink) 100%);
+  padding-bottom:4px;
+}
 
-  <div id="root" class="max-w-md w-full mx-auto h-screen sm:h-auto"></div>  <script type="text/babel">
-    const { useState, useEffect } = React;const CHABAD_TANYA_URL = 'https://he.chabad.org/dailystudy/tanya.htm';
-const DAF_YOMI_FALLBACK_URL = 'https://daf-yomi.com/DafYomi_Page.aspx?vt=1&id=4656';
+/* HEBREW CALENDAR */
+.heb-cal{
+  background:var(--parchment);
+  border:2px solid var(--gold);
+  border-top:none;
+  border-radius:0 0 20px 20px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.heb-cal-header{
+  background:var(--parchment2);
+  border-bottom:1.5px solid var(--parchment3);
+  padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.heb-cal-header .month-nav{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink2);font-size:20px;padding:2px 8px;
+  border-radius:6px;transition:background 0.15s;
+  font-family:'Frank Ruhl Libre',serif;
+}
+.heb-cal-header .month-nav:hover{background:var(--parchment3);}
+.heb-month-title{
+  font-family:'Noto Serif Hebrew',serif;
+  font-size:16px;font-weight:700;color:var(--ink);
+  text-align:center;
+}
+.heb-month-title .greg-sub{
+  display:block;font-size:11px;color:var(--ink3);font-weight:400;margin-top:1px;
+}
+.cal-weekdays{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  background:var(--parchment2);
+  border-bottom:1px solid var(--parchment3);
+}
+.cal-wd{
+  text-align:center;padding:6px 2px;
+  font-size:11px;font-weight:600;color:var(--ink3);
+  font-family:'Noto Serif Hebrew',serif;
+}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:4px;}
+.cal-cell{
+  aspect-ratio:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  border-radius:10px;cursor:pointer;
+  transition:all 0.15s;position:relative;
+  padding:2px 0;
+}
+.cal-cell:hover:not(.empty){background:var(--parchment2);}
+.cal-cell.empty{cursor:default;}
+.cal-cell.today{background:var(--ink);color:white;}
+.cal-cell.today .hday{color:rgba(255,255,255,0.7);}
+.cal-cell.today .gday{color:white;}
+.cal-cell.learned{background:var(--green);color:white;}
+.cal-cell.learned .hday{color:rgba(255,255,255,0.8);}
+.cal-cell.learned .gday{color:white;}
+.cal-cell.learned::after{
+  content:'✓';
+  position:absolute;top:2px;left:3px;
+  font-size:9px;color:rgba(255,255,255,0.9);font-weight:700;
+}
+.cal-cell.shabbat:not(.today):not(.learned) .gday{color:var(--red);}
+.cal-cell.shabbat:not(.today):not(.learned) .hday{color:var(--red);}
+.cal-cell.selected:not(.today):not(.learned){
+  background:rgba(201,162,39,0.25);
+  border:1.5px solid var(--gold);
+}
+.hday{font-size:11px;color:var(--ink3);line-height:1;font-family:'Noto Serif Hebrew',serif;font-weight:500;}
+.gday{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;}
 
-const toGematria = (num) => {
-  const n = Number(num);
-  if (!n || n <= 0) return '';
-  const units = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט'];
-  const tens = ['', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ'];
-  const hundreds = ['', 'ק', 'ר', 'ש', 'ת'];
-  const h = Math.floor(n / 100);
-  const t = Math.floor((n % 100) / 10);
-  const u = n % 10;
-  let str = hundreds[h] || '';
-  if (t === 1 && u === 5) str += 'טו';
-  else if (t === 1 && u === 6) str += 'טז';
-  else str += (tens[t] || '') + (units[u] || '');
-  return str;
-};
+/* MAIN CONTENT */
+.main{flex:1;padding:16px 20px 24px;display:flex;flex-direction:column;gap:14px;}
 
-const TRACTATES = [
-  { he: 'ברכות', en: 'Berakhot' }, { he: 'שבת', en: 'Shabbat' }, { he: 'עירובין', en: 'Eruvin' },
-  { he: 'פסחים', en: 'Pesachim' }, { he: 'שקלים', en: 'Shekalim' }, { he: 'יומא', en: 'Yoma' },
-  { he: 'סוכה', en: 'Sukkah' }, { he: 'ביצה', en: 'Beitzah' }, { he: 'ראש השנה', en: 'Rosh Hashanah' },
-  { he: 'תענית', en: 'Taanit' }, { he: 'מגילה', en: 'Megillah' }, { he: 'מועד קטן', en: 'Moed Katan' },
-  { he: 'חגיגה', en: 'Chagigah' }, { he: 'יבמות', en: 'Yevamot' }, { he: 'כתובות', en: 'Ketubot' },
-  { he: 'נדרים', en: 'Nedarim' }, { he: 'נזיר', en: 'Nazir' }, { he: 'סוטה', en: 'Sotah' },
-  { he: 'גיטין', en: 'Gittin' }, { he: 'קידושין', en: 'Kiddushin' }, { he: 'בבא קמא', en: 'Bava Kamma' },
-  { he: 'בבא מציעא', en: 'Bava Metzia' }, { he: 'בבא בתרא', en: 'Bava Batra' }, { he: 'סנהדרין', en: 'Sanhedrin' },
-  { he: 'מכות', en: 'Makkot' }, { he: 'שבועות', en: 'Shevuot' }, { he: 'עבודה זרה', en: 'Avodah Zarah' },
-  { he: 'הוריות', en: 'Horayot' }, { he: 'זבחים', en: 'Zevachim' }, { he: 'מנחות', en: 'Menachot' },
-  { he: 'חולין', en: 'Chullin' }, { he: 'בכורות', en: 'Bekhorot' }, { he: 'ערכין', en: 'Arakhin' },
-  { he: 'תמורה', en: 'Temurah' }, { he: 'כריתות', en: 'Keritot' }, { he: 'מעילה', en: 'Meilah' },
-  { he: 'תמיד', en: 'Tamid' }, { he: 'מידות', en: 'Middot' }, { he: 'קינים', en: 'Kinnim' }, { he: 'נידה', en: 'Niddah' }
-];
+/* STUDY CARD */
+.study-card{
+  background:white;
+  border-radius:20px;
+  border:1.5px solid var(--parchment3);
+  box-shadow:0 2px 16px rgba(26,10,46,0.08);
+  overflow:hidden;
+}
+.study-card-header{
+  background:linear-gradient(135deg, var(--parchment2) 0%, var(--parchment) 100%);
+  border-bottom:1px solid var(--parchment3);
+  padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.study-card-label{
+  font-size:11px;font-weight:700;letter-spacing:0.08em;
+  color:var(--ink3);text-transform:uppercase;
+}
+.study-type-badge{
+  font-size:11px;padding:3px 10px;border-radius:20px;
+  font-weight:700;
+}
+.badge-gemara{background:rgba(26,58,124,0.12);color:var(--blue);}
+.badge-tanya{background:rgba(26,92,58,0.12);color:var(--green);}
+.badge-daily{background:rgba(201,162,39,0.15);color:#7a5c00;}
+.badge-custom{background:rgba(107,79,140,0.12);color:var(--ink2);}
 
-const TANYA_SECTIONS = [
-  { he: 'לקוטי אמרים', en: 'Likutei Amarim', max: 53 },
-  { he: 'שער היחוד והאמונה', en: 'Shaar HaYichud VeHaEmunah', max: 12 },
-  { he: 'אגרת התשובה', en: 'Iggeret HaTeshuvah', max: 12 },
-  { he: 'אגרת הקודש', en: 'Iggeret HaKodesh', max: 32 },
-  { he: 'קונטרס אחרון', en: 'Kuntres Acharon', max: 9 }
-];
+.study-card-body{padding:16px;}
+.daf-title{
+  font-family:'Noto Serif Hebrew',serif;
+  font-size:28px;font-weight:900;
+  color:var(--ink);line-height:1.2;margin-bottom:4px;
+}
+.daf-subtitle{font-size:13px;color:var(--ink3);font-weight:400;}
 
-const TRACTATE_DAF_LIMITS = {
-  Berakhot: 64, Shabbat: 157, Eruvin: 105, Pesachim: 121, Shekalim: 22, Yoma: 88,
-  Sukkah: 56, Beitzah: 40, 'Rosh Hashanah': 35, Taanit: 31, Megillah: 32,
-  'Moed Katan': 29, Chagigah: 27, Yevamot: 122, Ketubot: 112, Nedarim: 91,
-  Nazir: 66, Sotah: 49, Gittin: 90, Kiddushin: 82, 'Bava Kamma': 119,
-  'Bava Metzia': 119, 'Bava Batra': 176, Sanhedrin: 113, Makkot: 24, Shevuot: 49,
-  'Avodah Zarah': 76, Horayot: 14, Zevachim: 120, Menachot: 110, Chullin: 142,
-  Bekhorot: 61, Arakhin: 34, Temurah: 34, Keritot: 28, Meilah: 22, Tamid: 10,
-  Middot: 4, Kinnim: 3, Niddah: 73
-};
+/* LEARN BUTTON */
+.learn-btn{
+  width:100%;padding:14px;border:none;cursor:pointer;
+  border-radius:14px;font-family:'Frank Ruhl Libre',serif;
+  font-size:17px;font-weight:700;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:12px;
+}
+.learn-btn.idle{
+  background:var(--ink);color:var(--gold2);
+  border:1.5px solid var(--ink);
+}
+.learn-btn.idle:hover{background:var(--ink2);}
+.learn-btn.done{
+  background:var(--green);color:white;
+}
+.learn-btn svg{width:20px;height:20px;}
 
-const DAF_YOMI_START_IDS = TRACTATES.reduce((acc, tractate, index) => {
-  if (index === 0) acc[tractate.en] = 1;
-  else {
-    const previous = TRACTATES[index - 1].en;
-    acc[tractate.en] = acc[previous] + ((TRACTATE_DAF_LIMITS[previous] - 1) * 2);
-  }
-  return acc;
-}, {});
+/* ENTER BTN */
+.enter-btn{
+  width:100%;padding:16px;border:none;cursor:pointer;
+  background:linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  color:var(--ink);
+  border-radius:16px;font-family:'Noto Serif Hebrew',serif;
+  font-size:19px;font-weight:900;
+  box-shadow:0 4px 20px rgba(201,162,39,0.35);
+  transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;
+  letter-spacing:0.02em;
+}
+.enter-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(201,162,39,0.45);}
+.enter-btn:active{transform:scale(0.98);}
+.enter-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
 
-const FALLBACK_DAF = { he: 'חולין כו', ref: 'Chullin.26a' };
-const FALLBACK_TANYA = { he: 'תניא יומי', ref: 'chabad_tanya_daily' };
+/* CUSTOM PICKER */
+.picker-row{display:flex;gap:8px;align-items:center;}
+.picker-btn{
+  background:white;border:1.5px solid var(--parchment3);
+  border-radius:10px;padding:8px 12px;cursor:pointer;
+  color:var(--ink2);font-size:16px;font-weight:700;
+  transition:all 0.15s;font-family:'Frank Ruhl Libre',serif;
+}
+.picker-btn:hover{background:var(--parchment2);}
+.picker-select{
+  flex:1;background:white;border:1.5px solid var(--parchment3);
+  border-radius:10px;padding:10px 12px;
+  font-family:'Frank Ruhl Libre',serif;font-size:14px;font-weight:600;
+  color:var(--ink);direction:rtl;outline:none;cursor:pointer;
+  appearance:none;text-align:center;
+}
+.picker-select:focus{border-color:var(--gold);}
 
-const safeJsonFetch = async (url) => {
-  if (!url) return { ok: false, data: null, error: 'כתובת ריקה' };
-  try {
-    const res = await fetch(url, { headers: { Accept: 'application/json' } });
-    const text = await res.text();
-    const trimmed = text.trim();
-    if (!res.ok) return { ok: false, data: null, error: 'HTTP ' + res.status };
-    if (!trimmed) return { ok: false, data: null, error: 'תגובה ריקה' };
-    if (trimmed.startsWith('<')) return { ok: false, data: null, error: 'השרת החזיר HTML במקום JSON' };
-    return { ok: true, data: JSON.parse(trimmed), error: '' };
-  } catch (err) {
-    return { ok: false, data: null, error: err.message || 'שגיאת רשת' };
-  }
-};
+/* STUDY VIEW OVERLAY */
+.overlay{
+  position:fixed;inset:0;z-index:200;
+  background:var(--parchment);
+  display:flex;flex-direction:column;
+  animation:slideUp 0.3s ease-out;
+}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.overlay-header{
+  background:var(--ink);
+  padding:16px 16px 0;
+  border-bottom:2px solid var(--gold);
+}
+.overlay-top{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.overlay-title{
+  font-family:'Noto Serif Hebrew',serif;
+  font-size:18px;font-weight:900;color:var(--gold2);
+  display:flex;align-items:center;gap:8px;flex:1;min-width:0;
+}
+.overlay-title span{truncate:ellipsis;overflow:hidden;white-space:nowrap;}
+.overlay-close{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+  color:white;border-radius:10px;padding:6px 14px;cursor:pointer;
+  font-family:'Frank Ruhl Libre',serif;font-size:14px;font-weight:600;
+  transition:background 0.15s;flex-shrink:0;
+}
+.overlay-close:hover{background:rgba(255,255,255,0.2);}
+.daf-nav{
+  display:flex;gap:8px;padding:10px 16px;
+  background:var(--ink2);
+  border-bottom:1px solid rgba(201,162,39,0.3);
+}
+.daf-nav-btn{
+  flex:1;padding:10px;border:1px solid rgba(201,162,39,0.3);
+  border-radius:10px;background:rgba(255,255,255,0.07);
+  color:var(--gold2);font-family:'Frank Ruhl Libre',serif;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;
+}
+.daf-nav-btn:hover{background:rgba(255,255,255,0.15);}
+.tabs{display:flex;background:white;border-bottom:2px solid var(--parchment3);}
+.tab{
+  flex:1;padding:12px 4px;border:none;background:none;cursor:pointer;
+  font-family:'Frank Ruhl Libre',serif;font-size:13px;font-weight:600;
+  color:#888;transition:all 0.15s;border-bottom:3px solid transparent;margin-bottom:-2px;
+}
+.tab.active{color:var(--ink);border-bottom-color:var(--gold);}
+.tab-content{flex:1;overflow-y:auto;padding:20px 16px;}
 
-const normalizeSefariaRef = (ref) => String(ref || '')
-  .trim()
-  .replace(/^\/+|\/+$/g, '')
-  .replace(/\s+/g, '_');
+/* TEXT DISPLAY */
+.gemara-text{
+  font-family:'Noto Serif Hebrew',serif;
+  font-size:19px;line-height:2.1;color:var(--ink);
+  direction:rtl;
+}
+.gemara-text p{
+  margin-bottom:24px;padding:16px 20px;
+  background:white;border-radius:14px;
+  border:1px solid var(--parchment3);
+  border-right:4px solid var(--gold);
+}
+.gemara-text b{color:var(--ink);font-weight:700;}
 
-const buildSefariaTextUrl = (ref) => {
-  const normalized = normalizeSefariaRef(ref);
-  return normalized ? 'https://www.sefaria.org/api/texts/' + encodeURI(normalized) : '';
-};
+/* PORTAL CARD */
+.portal-card{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:32px 24px;gap:20px;text-align:center;
+  flex:1;
+}
+.portal-icon{font-size:48px;margin-bottom:4px;}
+.portal-title{
+  font-family:'Noto Serif Hebrew',serif;
+  font-size:24px;font-weight:900;color:var(--ink);
+}
+.portal-desc{font-size:14px;color:var(--ink3);line-height:1.7;max-width:280px;}
+.portal-btn{
+  display:block;width:100%;padding:14px;text-decoration:none;
+  background:var(--ink);color:var(--gold2);
+  border-radius:14px;font-family:'Noto Serif Hebrew',serif;
+  font-size:17px;font-weight:900;text-align:center;
+  box-shadow:0 4px 16px rgba(26,10,46,0.2);transition:all 0.2s;cursor:pointer;border:none;
+}
+.portal-btn:hover{background:var(--ink2);}
 
-const buildSefariaCommentaryUrl = (prefix, ref) => {
-  const normalized = normalizeSefariaRef(ref);
-  return normalized ? 'https://www.sefaria.org/api/texts/' + encodeURI(prefix + normalized) : '';
-};
+/* NOTES */
+.notes-area{
+  padding:12px 16px;background:#fffbf0;
+  border-top:1px solid #e8d89a;
+  flex-shrink:0;
+}
+.notes-label{font-size:12px;font-weight:700;color:#7a5c00;margin-bottom:6px;text-align:right;}
+.notes-ta{
+  width:100%;min-height:100px;resize:none;
+  background:white;border:1.5px solid #e8d89a;
+  border-radius:10px;padding:10px 14px;
+  font-family:'Frank Ruhl Libre',serif;font-size:15px;
+  color:var(--ink);direction:rtl;outline:none;
+  line-height:1.7;
+}
+.notes-ta:focus{border-color:var(--gold);}
 
-const parseDafRef = (ref) => {
-  const clean = String(ref || '').replaceAll('_', ' ').trim();
-  if (!clean) return null;
-  const parts = clean.split('.');
-  if (parts.length >= 2) {
-    const tractate = parts[0].trim();
-    const page = parts[1].trim();
-    const amud = page.endsWith('b') ? 'b' : 'a';
-    const daf = Number(page.replace('a', '').replace('b', ''));
-    if (tractate && daf) return { tractate, daf, amud };
-  }
-  const words = clean.split(' ');
-  const page = words.pop() || '';
-  const tractate = words.join(' ').trim();
-  const amud = page.endsWith('b') ? 'b' : 'a';
-  const daf = Number(page.replace('a', '').replace('b', ''));
-  if (tractate && daf) return { tractate, daf, amud };
-  return null;
-};
+/* LOADER */
+.loader{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;padding:40px;color:var(--ink2);
+}
+.spin{
+  width:36px;height:36px;
+  border:3px solid var(--parchment3);
+  border-top-color:var(--gold);
+  border-radius:50%;animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-const buildDafRef = (tractate, daf, amud) => tractate + '.' + daf + amud;
+/* DATE NAV */
+.date-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 0;
+}
+.date-nav-btn{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+  border-radius:8px;padding:5px 12px;cursor:pointer;
+  color:rgba(255,255,255,0.7);font-size:16px;transition:all 0.15s;
+}
+.date-nav-btn:hover{background:rgba(255,255,255,0.2);}
+.date-display{text-align:center;color:white;}
+.date-display .hdate{font-family:'Noto Serif Hebrew',serif;font-size:14px;font-weight:700;}
+.date-display .gdate{font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;}
 
-const getDafYomiPageUrl = (ref) => {
-  const parsed = parseDafRef(ref);
-  if (!parsed) return DAF_YOMI_FALLBACK_URL;
-  const startId = DAF_YOMI_START_IDS[parsed.tractate];
-  const maxDaf = TRACTATE_DAF_LIMITS[parsed.tractate] || 175;
-  if (!startId || !parsed.daf || parsed.daf < 2 || parsed.daf > maxDaf) return DAF_YOMI_FALLBACK_URL;
-  const id = startId + ((parsed.daf - 2) * 2) + (parsed.amud === 'b' ? 1 : 0);
-  return 'https://daf-yomi.com/DafYomi_Page.aspx?vt=1&id=' + id;
-};
+/* SPINNER overlay */
+.full-loader{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:16px;flex:1;
+}
+.full-loader p{font-family:'Noto Serif Hebrew',serif;font-size:18px;color:var(--ink2);font-weight:700;}
 
-const getHebrewDafTitle = (ref) => {
-  const parsed = parseDafRef(ref);
-  if (!parsed) return '';
-  const tractate = TRACTATES.find(t => t.en === parsed.tractate);
-  return (tractate?.he || parsed.tractate) + ' דף ' + toGematria(parsed.daf) + ' ע' + (parsed.amud === 'a' ? 'א' : 'ב');
-};
+/* ERROR */
+.error-box{
+  background:#fff8e6;border:1.5px solid #e8d89a;
+  border-radius:14px;padding:12px 16px;
+  font-size:13px;color:#7a5c00;font-weight:600;line-height:1.6;
+}
 
-const getAdjacentDafRef = (ref, direction) => {
-  const parsed = parseDafRef(ref);
-  if (!parsed) return ref;
-  const index = TRACTATES.findIndex(t => t.en === parsed.tractate);
-  if (index < 0) return ref;
-  let tractate = parsed.tractate;
-  let daf = parsed.daf;
-  let amud = parsed.amud;
-  const maxDaf = TRACTATE_DAF_LIMITS[tractate] || 175;
-  if (direction > 0) {
-    if (amud === 'a') amud = 'b';
-    else if (daf < maxDaf) { daf += 1; amud = 'a'; }
-    else if (TRACTATES[index + 1]) { tractate = TRACTATES[index + 1].en; daf = 2; amud = 'a'; }
-  } else {
-    if (amud === 'b') amud = 'a';
-    else if (daf > 2) { daf -= 1; amud = 'b'; }
-    else if (TRACTATES[index - 1]) { tractate = TRACTATES[index - 1].en; daf = TRACTATE_DAF_LIMITS[tractate] || 2; amud = 'b'; }
-  }
-  return buildDafRef(tractate, daf, amud);
-};
+/* HISTORY MODAL */
+.hist-modal{position:fixed;inset:0;z-index:300;background:var(--parchment);display:flex;flex-direction:column;animation:slideUp 0.25s ease-out;}
+.hist-header{
+  background:var(--ink);padding:20px;border-bottom:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.hist-title{font-family:'Noto Serif Hebrew',serif;font-size:20px;font-weight:900;color:var(--gold2);}
+.hist-close{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:10px;padding:6px 14px;cursor:pointer;font-size:14px;font-weight:600;}
+.hist-content{flex:1;overflow-y:auto;padding:20px;}
 
-const runSmokeTests = () => {
-  console.assert(toGematria(15) === 'טו', 'בדיקה נכשלה: גימטריה 15');
-  console.assert(toGematria(16) === 'טז', 'בדיקה נכשלה: גימטריה 16');
-  console.assert(toGematria(400) === 'ת', 'בדיקה נכשלה: גימטריה 400');
-  console.assert(getDafYomiPageUrl('Berakhot.2a').includes('id=1'), 'בדיקה נכשלה: צורת הדף ברכות ב א');
-  console.assert(getDafYomiPageUrl('Shabbat.2a').includes('id=127'), 'בדיקה נכשלה: צורת הדף שבת ב א');
-  console.assert(getDafYomiPageUrl('Chullin.26a').includes('id=4656'), 'בדיקה נכשלה: צורת הדף חולין כו א');
-  console.assert(getDafYomiPageUrl('Chullin.26b').includes('id=4657'), 'בדיקה נכשלה: צורת הדף חולין כו ב');
-  console.assert(getAdjacentDafRef('Chullin.26a', 1) === 'Chullin.26b', 'בדיקה נכשלה: מעבר עמוד');
-  console.assert(getAdjacentDafRef('Chullin.26b', 1) === 'Chullin.27a', 'בדיקה נכשלה: מעבר דף');
-  console.assert(buildSefariaTextUrl('Chullin.26a').includes('Chullin.26a'), 'בדיקה נכשלה: URL ספריא גמרא');
-  console.assert(buildSefariaCommentaryUrl('Rashi_on_', 'Chullin.26a').includes('Rashi_on_Chullin.26a'), 'בדיקה נכשלה: URL רש"י');
-  console.assert(CHABAD_TANYA_URL.includes('chabad.org/dailystudy/tanya.htm'), 'בדיקה נכשלה: URL תניא חב"ד');
-};
-runSmokeTests();
+/* CUSTOM SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--parchment3);border-radius:10px}
 
-function DafYomiApp() {
-  const [masterMode, setMasterMode] = useState('daf_yomi');
-  const [studyMode, setStudyMode] = useState('daily');
+/* Toggle row */
+.study-mode-row{
+  display:flex;gap:4px;background:var(--parchment2);
+  border-radius:10px;padding:3px;border:1px solid var(--parchment3);
+}
+.study-mode-btn{
+  flex:1;padding:7px;border:none;cursor:pointer;
+  border-radius:8px;font-family:'Frank Ruhl Libre',serif;
+  font-size:13px;font-weight:600;transition:all 0.15s;
+  background:transparent;color:var(--ink3);
+}
+.study-mode-btn.active{background:white;color:var(--ink);box-shadow:0 1px 6px rgba(26,10,46,0.1);}
 
-  const [customTractate, setCustomTractate] = useState(TRACTATES[0].en);
-  const [customDaf, setCustomDaf] = useState(2);
-  const [customAmud, setCustomAmud] = useState('a');
-  const [customTanyaSection, setCustomTanyaSection] = useState(TANYA_SECTIONS[0].en);
-  const [customTanyaChapter, setCustomTanyaChapter] = useState(1);
-
-  const [dateOffset, setDateOffset] = useState(0);
-  const [dateInfo, setDateInfo] = useState({ he: '', day: '', greg: '' });
-  const [isLoading, setIsLoading] = useState(true);
-  const [globalError, setGlobalError] = useState('');
-
-  const [dafInfo, setDafInfo] = useState(FALLBACK_DAF);
-  const [tanyaInfo, setTanyaInfo] = useState(FALLBACK_TANYA);
-  const [isLearned, setIsLearned] = useState(false);
-  const [isTanyaLearned, setIsTanyaLearned] = useState(false);
-  const [streak, setStreak] = useState(0);
-  const [tanyaStreak, setTanyaStreak] = useState(0);
-
-  const [showText, setShowText] = useState(false);
-  const [activeTab, setActiveTab] = useState('gemara');
-  const [currentLearningTitle, setCurrentLearningTitle] = useState('');
-  const [textContents, setTextContents] = useState({ gemara: [], explanation: [], rashi: [], tosafot: [], scan_url: '' });
-  const [isTextLoading, setIsTextLoading] = useState(false);
-  const [textError, setTextError] = useState('');
-  const [currentActiveRef, setCurrentActiveRef] = useState('');
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-
-  const [showNotes, setShowNotes] = useState(false);
-  const [noteText, setNoteText] = useState('');
-  const [hasNote, setHasNote] = useState(false);
-
-  const safeLocalGet = (key, fallback = '') => {
-    try { return localStorage.getItem(key) || fallback; } catch (e) { return fallback; }
-  };
-
-  const safeLocalSet = (key, value) => {
-    try { localStorage.setItem(key, value); } catch (e) {}
-  };
-
-  useEffect(() => { fetchDailyData(); }, [dateOffset]);
-
-  const fetchDailyData = async () => {
-    setIsLoading(true);
-    setGlobalError('');
-
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + dateOffset);
-    const year = targetDate.getFullYear();
-    const month = targetDate.getMonth() + 1;
-    const day = targetDate.getDate();
-    const formattedGregDate = targetDate.toLocaleDateString('he-IL');
-
-    setDateInfo({
-      he: formattedGregDate,
-      day: `יום ${['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'][targetDate.getDay()]}`,
-      greg: formattedGregDate
-    });
-
-    const sefaria = await safeJsonFetch(`https://www.sefaria.org/api/calendars?year=${year}&month=${month}&day=${day}`);
-    if (sefaria.ok && Array.isArray(sefaria.data.calendar_items)) {
-      const dafItem = sefaria.data.calendar_items.find(item => item.title && item.title.en === 'Daf Yomi');
-      const tanyaItem = sefaria.data.calendar_items.find(item => item.title && item.title.en === 'Tanya Yomi');
-      setDafInfo(dafItem ? { he: dafItem.displayValue?.he || FALLBACK_DAF.he, ref: dafItem.url || FALLBACK_DAF.ref } : FALLBACK_DAF);
-      setTanyaInfo(tanyaItem ? { he: `תניא - ${tanyaItem.displayValue?.he || 'יומי'}`, ref: 'chabad_tanya_daily' } : FALLBACK_TANYA);
-    } else {
-      setDafInfo(FALLBACK_DAF);
-      setTanyaInfo(FALLBACK_TANYA);
-      setGlobalError('לא הצלחתי לטעון את הלימוד היומי. אפשר לבחור לימוד אישי או לנסות שוב.');
-    }
-
-    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const hebcal = await safeJsonFetch(`https://www.hebcal.com/converter?cfg=json&date=${dateString}&g2h=1&strict=1`);
-    if (hebcal.ok && hebcal.data.hebrew) {
-      setDateInfo(prev => ({ ...prev, he: hebcal.data.hebrew.replace(/[\u0591-\u05C7]/g, '') }));
-    }
-
-    setIsLearned(safeLocalGet(`daf_learned_${formattedGregDate}`) === 'true');
-    setIsTanyaLearned(safeLocalGet(`tanya_learned_${formattedGregDate}`) === 'true');
-    setStreak(parseInt(safeLocalGet('daf_streak', '0'), 10) || 0);
-    setTanyaStreak(parseInt(safeLocalGet('tanya_streak', '0'), 10) || 0);
-    setIsLoading(false);
-  };
-
-  const getCurrentRef = () => {
-    if (masterMode === 'daf_yomi') {
-      return studyMode === 'daily' ? dafInfo.ref : `${customTractate}.${customDaf}${customAmud}`;
-    }
-    return studyMode === 'daily' ? tanyaInfo.ref : `chabad_tanya_${customTanyaSection}_${customTanyaChapter}`;
-  };
-
-  const getLearningTitle = () => {
-    if (masterMode === 'daf_yomi') {
-      if (studyMode === 'daily') return dafInfo.he;
-      const tractate = TRACTATES.find(t => t.en === customTractate);
-      return `${tractate?.he || ''} דף ${toGematria(customDaf)} ע${customAmud === 'a' ? 'א' : 'ב'}`;
-    }
-    if (studyMode === 'daily') return tanyaInfo.he;
-    const section = TANYA_SECTIONS.find(s => s.en === customTanyaSection);
-    return `תניא - ${section?.he || ''} פרק ${toGematria(customTanyaChapter)}`;
-  };
-
-  const getNoteKey = (ref) => `beit_midrash_note_${ref}`;
-
-  const loadNoteForRef = (ref) => {
-    const saved = safeLocalGet(getNoteKey(ref), '');
-    setNoteText(saved);
-    setHasNote(saved.trim().length > 0);
-  };
-
-  const saveNoteForRef = (value) => {
-    setNoteText(value);
-    setHasNote(value.trim().length > 0);
-    if (currentActiveRef) safeLocalSet(getNoteKey(currentActiveRef), value);
-  };
-
-  const resetText = () => {
-    setTextError('');
-    setTextContents({ gemara: [], explanation: [], rashi: [], tosafot: [], scan_url: '' });
-  };
-
-  const getTextUrlsForTab = (tab, ref) => {
-    if (tab === 'gemara') return [buildSefariaTextUrl(ref)];
-    if (tab === 'explanation') return [buildSefariaCommentaryUrl('Steinsaltz_on_', ref)];
-    if (tab === 'rashi') return [buildSefariaCommentaryUrl('Rashi_on_', ref)];
-    if (tab === 'tosafot') {
-      const parsed = parseDafRef(ref);
-      const baseRef = parsed ? buildDafRef(parsed.tractate, parsed.daf, parsed.amud) : ref;
-      return [
-        buildSefariaCommentaryUrl('Tosafot_on_', baseRef),
-        buildSefariaTextUrl('Tosafot on ' + String(baseRef).replace('.', ' ')),
-        buildSefariaCommentaryUrl('Tosafot_on_', ref)
-      ].filter(Boolean);
-    }
-    return [];
-  };
-
-  const fetchTextData = async (tab, ref) => {
-    const activeRef = String(ref || currentActiveRef || '').trim();
-    setTextError('');
-
-    if (tab === 'scan') {
-      setTextContents(prev => ({ ...prev, scan_url: getDafYomiPageUrl(activeRef) }));
-      return;
-    }
-
-    if (tab === 'tanya_original' || tab === 'tanya_explanation') return;
-    if (!activeRef) {
-      setTextError('אין מראה מקום תקין לטעינה.');
-      return;
-    }
-
-    const urls = getTextUrlsForTab(tab, activeRef);
-    if (!urls.length) {
-      setTextError('הלשונית הזו לא מוגדרת לטעינה.');
-      return;
-    }
-
-    setIsTextLoading(true);
-    let clean = [];
-    let lastError = '';
-
-    for (const url of urls) {
-      const result = await safeJsonFetch(url);
-      if (!result.ok) {
-        lastError = result.error;
-        continue;
-      }
-      const raw = Array.isArray(result.data.he) ? result.data.he.flat(Infinity) : [result.data.he];
-      clean = raw.filter(item => typeof item === 'string' && item.trim());
-      if (clean.length) break;
-      lastError = 'לא נמצא תוכן עברי במקור הזה';
-    }
-
-    setTextContents(prev => ({ ...prev, [tab]: clean }));
-    if (!clean.length) {
-      setTextError(tab === 'tosafot'
-        ? `לא נמצאו תוספות לדף הזה במאגר ספריא. ${lastError || ''}`
-        : `לא נמצא תוכן עברי להצגה בלשונית הזו. ${lastError || ''}`);
-    }
-    setIsTextLoading(false);
-  };
-
-  const handleEnterBeitMidrash = () => {
-    const ref = getCurrentRef();
-    if (!ref) return;
-    resetText();
-    setCurrentActiveRef(ref);
-    setCurrentLearningTitle(getLearningTitle());
-    loadNoteForRef(ref);
-    setShowNotes(false);
-    setShowText(true);
-    const initialTab = masterMode === 'daf_yomi' ? 'gemara' : 'tanya_original';
-    setActiveTab(initialTab);
-    fetchTextData(initialTab, ref);
-  };
-
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-    fetchTextData(tab, currentActiveRef);
-  };
-
-  const refreshOpenDaf = (newRef, preferredTab = activeTab) => {
-    resetText();
-    setCurrentActiveRef(newRef);
-    setCurrentLearningTitle(getHebrewDafTitle(newRef));
-    loadNoteForRef(newRef);
-    setActiveTab(preferredTab);
-    fetchTextData(preferredTab, newRef);
-  };
-
-  const handleOpenPrevDaf = () => {
-    if (masterMode !== 'daf_yomi') return;
-    const newRef = getAdjacentDafRef(currentActiveRef, -1);
-    const parsed = parseDafRef(newRef);
-    if (parsed && studyMode === 'custom') {
-      setCustomTractate(parsed.tractate);
-      setCustomDaf(parsed.daf);
-      setCustomAmud(parsed.amud);
-    }
-    refreshOpenDaf(newRef);
-  };
-
-  const handleOpenNextDaf = () => {
-    if (masterMode !== 'daf_yomi') return;
-    const newRef = getAdjacentDafRef(currentActiveRef, 1);
-    const parsed = parseDafRef(newRef);
-    if (parsed && studyMode === 'custom') {
-      setCustomTractate(parsed.tractate);
-      setCustomDaf(parsed.daf);
-      setCustomAmud(parsed.amud);
-    }
-    refreshOpenDaf(newRef);
-  };
-
-  const handleToggleLearn = () => {
-    const learnedKey = masterMode === 'daf_yomi' ? `daf_learned_${dateInfo.greg}` : `tanya_learned_${dateInfo.greg}`;
-    const streakKey = masterMode === 'daf_yomi' ? 'daf_streak' : 'tanya_streak';
-    const current = masterMode === 'daf_yomi' ? isLearned : isTanyaLearned;
-    const next = !current;
-    const oldStreak = parseInt(safeLocalGet(streakKey, '0'), 10) || 0;
-    const newStreak = next ? oldStreak + 1 : Math.max(0, oldStreak - 1);
-    safeLocalSet(learnedKey, String(next));
-    safeLocalSet(streakKey, String(newStreak));
-    if (masterMode === 'daf_yomi') { setIsLearned(next); setStreak(newStreak); }
-    else { setIsTanyaLearned(next); setTanyaStreak(newStreak); }
-  };
-
-  const handlePrevDaf = () => {
-    if (customAmud === 'b') setCustomAmud('a');
-    else if (Number(customDaf) > 2) { setCustomDaf(Number(customDaf) - 1); setCustomAmud('b'); }
-  };
-
-  const handleNextDaf = () => {
-    if (customAmud === 'a') setCustomAmud('b');
-    else if (Number(customDaf) < 175) { setCustomDaf(Number(customDaf) + 1); setCustomAmud('a'); }
-  };
-
-  const handlePrevTanya = () => {
-    if (Number(customTanyaChapter) > 1) setCustomTanyaChapter(Number(customTanyaChapter) - 1);
-  };
-
-  const handleNextTanya = () => {
-    const max = TANYA_SECTIONS.find(s => s.en === customTanyaSection)?.max || 53;
-    if (Number(customTanyaChapter) < max) setCustomTanyaChapter(Number(customTanyaChapter) + 1);
-  };
-
-  const title = getLearningTitle();
-  const learned = masterMode === 'daf_yomi' ? isLearned : isTanyaLearned;
-
-  return (
-    <div className="bg-white/40 shadow-2xl overflow-hidden sm:rounded-[2.5rem] flex flex-col h-full sm:h-[88vh] relative w-full glass-card border-none">
-      <div className="bg-gradient-to-br from-violet-600 to-indigo-800 p-6 pt-12 pb-10 text-white text-center relative shrink-0 rounded-b-[3rem] shadow-2xl z-10">
-        <div className="absolute top-6 left-6 bg-white/10 backdrop-blur-md rounded-2xl px-4 py-2 flex items-center gap-2 shadow-lg border border-white/20">
-          <span className="text-2xl animate-pulse">🔥</span>
-          <span className="font-black text-xl tracking-tighter">{masterMode === 'daf_yomi' ? streak : tanyaStreak}</span>
-        </div>
-
-        <button onClick={() => setShowHistoryModal(true)} className="absolute top-6 right-6 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl p-2.5 transition-all shadow-lg border border-white/20 active:scale-90" aria-label="פתח היסטוריה">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-        </button>
-
-        <h1 className="text-3xl font-black mb-6 tracking-tight drop-shadow-md">בית המדרש</h1>
-
-        <div className="flex justify-center gap-3 mb-6 p-1 bg-black/10 rounded-[1.5rem] backdrop-blur-sm max-w-[280px] mx-auto border border-white/10">
-          <button onClick={() => { setMasterMode('daf_yomi'); setShowText(false); }} className={`flex-1 py-3 rounded-[1.2rem] text-sm font-bold transition-all ${masterMode === 'daf_yomi' ? 'bg-white text-violet-700 shadow-xl scale-105' : 'text-violet-100 hover:text-white'}`}>גמרא</button>
-          <button onClick={() => { setMasterMode('tanya'); setShowText(false); }} className={`flex-1 py-3 rounded-[1.2rem] text-sm font-bold transition-all ${masterMode === 'tanya' ? 'bg-white text-violet-700 shadow-xl scale-105' : 'text-violet-100 hover:text-white'}`}>תניא</button>
-        </div>
-
-        <div className="flex bg-white/10 p-1 rounded-xl max-w-[160px] mx-auto">
-          <button onClick={() => setStudyMode('daily')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${studyMode === 'daily' ? 'bg-white/20 text-white' : 'text-violet-200 hover:text-white'}`}>יומי</button>
-          <button onClick={() => setStudyMode('custom')} className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${studyMode === 'custom' ? 'bg-white/20 text-white' : 'text-violet-200 hover:text-white'}`}>אישי</button>
-        </div>
+.hidden{display:none!important;}
+.fade{animation:fadeIn 0.25s ease-out;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">בית המדרש <span>הדיגיטלי</span></div>
+      <div id="streakBadge" class="streak-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14zm0 17a3 3 0 0 1-3-3c0-3 3-4 3-7 0 3 3 4 3 7a3 3 0 0 1-3 3z"/></svg>
+        <span id="streakNum">0</span>
       </div>
-
-      <div className="p-8 text-center overflow-y-auto grow custom-scrollbar flex flex-col justify-center animate-fade-in z-0">
-        {globalError && <div className="mb-5 rounded-3xl border border-yellow-200 bg-yellow-50 p-4 text-yellow-800 text-sm font-bold leading-relaxed">{globalError}</div>}
-
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center gap-4 text-violet-700 font-black">
-            <div className="w-14 h-14 border-4 border-violet-200 border-b-violet-600 rounded-full animate-spin"></div>
-            טוען לימוד יומי...
-          </div>
-        ) : studyMode === 'daily' ? (
-          <div className="space-y-8">
-            <div className="flex flex-col items-center">
-              <div className="flex items-center justify-between w-full bg-violet-50/50 rounded-3xl p-4 border border-violet-100/50 shadow-sm">
-                <button onClick={() => setDateOffset(prev => prev - 1)} className="p-3 bg-white text-violet-600 rounded-2xl shadow-sm hover:scale-110 active:scale-90 transition-transform" aria-label="יום קודם">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7"></path></svg>
-                </button>
-                <div className="text-center">
-                  <span className="block text-xl font-black text-violet-900">{dateInfo.day}</span>
-                  <span className="block text-sm font-bold text-violet-500">{dateInfo.he}</span>
-                </div>
-                <button onClick={() => setDateOffset(prev => prev + 1)} className="p-3 bg-white text-violet-600 rounded-2xl shadow-sm hover:scale-110 active:scale-90 transition-transform" aria-label="יום הבא">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"></path></svg>
-                </button>
-              </div>
-              {dateOffset !== 0 && <button onClick={() => setDateOffset(0)} className="mt-4 text-xs font-black text-violet-600 hover:underline">חזור להיום</button>}
-            </div>
-
-            <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-700 to-indigo-900 leading-tight">{title || 'אין נתונים'}</h2>
-            <button onClick={handleToggleLearn} className={`w-full py-5 rounded-3xl text-2xl font-black transition-all shadow-xl flex items-center justify-center gap-4 transform active:scale-95 ${learned ? 'bg-green-500 text-white' : 'bg-white text-violet-700 border-2 border-violet-100 hover:bg-violet-50'}`}>
-              {learned ? 'למדתי היום!' : 'סמן כנלמד'}
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-6 bg-violet-50/50 p-6 rounded-[2rem] border border-violet-100">
-            <h3 className="text-lg font-bold text-violet-800">בחירת לימוד חופשי:</h3>
-            {masterMode === 'daf_yomi' ? (
-              <>
-                <select value={customTractate} onChange={e => setCustomTractate(e.target.value)} className="w-full bg-white border-2 border-violet-200 rounded-xl px-4 py-3 text-lg font-bold text-violet-700 outline-none text-center appearance-none shadow-sm">
-                  {TRACTATES.map(t => <option key={t.en} value={t.en}>{t.he}</option>)}
-                </select>
-                <div className="flex gap-2 items-center w-full">
-                  <button onClick={handlePrevDaf} className="p-3 bg-white border border-violet-200 text-violet-600 rounded-xl hover:bg-violet-100 shadow-sm active:scale-90 transition-transform">‹</button>
-                  <select value={customDaf} onChange={e => setCustomDaf(Number(e.target.value))} className="flex-1 bg-white border-2 border-violet-200 rounded-xl p-3 text-center text-lg font-black text-violet-700 appearance-none shadow-sm outline-none">
-                    {Array.from({ length: 174 }, (_, i) => i + 2).map(n => <option key={n} value={n}>דף {toGematria(n)}</option>)}
-                  </select>
-                  <select value={customAmud} onChange={e => setCustomAmud(e.target.value)} className="flex-1 bg-white border-2 border-violet-200 rounded-xl p-3 text-center text-lg font-bold text-violet-700 appearance-none shadow-sm outline-none">
-                    <option value="a">עמוד א'</option>
-                    <option value="b">עמוד ב'</option>
-                  </select>
-                  <button onClick={handleNextDaf} className="p-3 bg-white border border-violet-200 text-violet-600 rounded-xl hover:bg-violet-100 shadow-sm active:scale-90 transition-transform">›</button>
-                </div>
-              </>
-            ) : (
-              <>
-                <select value={customTanyaSection} onChange={e => { setCustomTanyaSection(e.target.value); setCustomTanyaChapter(1); }} className="w-full bg-white border-2 border-violet-200 rounded-xl px-4 py-3 text-lg font-bold text-violet-700 outline-none text-center appearance-none shadow-sm">
-                  {TANYA_SECTIONS.map(s => <option key={s.en} value={s.en}>{s.he}</option>)}
-                </select>
-                <div className="flex gap-2 items-center w-full mt-2">
-                  <button onClick={handlePrevTanya} className="p-3 bg-white border border-violet-200 text-violet-600 rounded-xl hover:bg-violet-100 shadow-sm active:scale-90 transition-transform">‹</button>
-                  <select value={customTanyaChapter} onChange={e => setCustomTanyaChapter(Number(e.target.value))} className="w-full bg-white border-2 border-violet-200 rounded-xl p-3 text-center text-lg font-black text-violet-700 appearance-none shadow-sm outline-none">
-                    {Array.from({ length: TANYA_SECTIONS.find(s => s.en === customTanyaSection)?.max || 53 }, (_, i) => i + 1).map(n => <option key={n} value={n}>פרק {toGematria(n)}</option>)}
-                  </select>
-                  <button onClick={handleNextTanya} className="p-3 bg-white border border-violet-200 text-violet-600 rounded-xl hover:bg-violet-100 shadow-sm active:scale-90 transition-transform">›</button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        <button onClick={handleEnterBeitMidrash} disabled={isLoading || !getCurrentRef()} className="mt-8 bg-gradient-to-br from-violet-600 to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white w-full py-5 rounded-[2rem] text-xl font-black shadow-2xl hover:shadow-violet-300 transition-all flex justify-center items-center gap-3 group active:scale-95">
-          היכנס לבית המדרש
-          <svg className="w-6 h-6 group-hover:translate-x-[-5px] transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M11 19l-7-7 7-7"></path></svg>
-        </button>
-      </div>
-
-      {showText && (
-        <div className="fixed inset-0 bg-white z-[100] flex flex-col animate-fade-in">
-          <div className="bg-violet-900 p-4 pt-10 text-white flex items-center justify-between shrink-0 shadow-2xl gap-3">
-            <h2 className="text-xl font-black flex items-center gap-3 min-w-0">
-              <span className="p-2 bg-white/10 rounded-xl shrink-0">📚</span>
-              <span className="truncate">{currentLearningTitle || title}</span>
-            </h2>
-            <div className="flex items-center gap-2 shrink-0">
-              <button onClick={() => setShowNotes(prev => !prev)} className="relative bg-white/10 hover:bg-white/20 text-white rounded-2xl py-2 px-4 font-black text-sm border border-white/20 transition-all active:scale-90">
-                הערות
-                {hasNote && <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-300 rounded-full border-2 border-violet-900"></span>}
-              </button>
-              <button onClick={() => setShowText(false)} className="bg-white/10 hover:bg-white/20 text-white rounded-2xl py-2 px-4 font-black text-sm border border-white/20 transition-all active:scale-90">סגור</button>
-            </div>
-          </div>
-
-          {masterMode === 'daf_yomi' && (
-            <div className="flex items-center gap-2 bg-white px-4 py-3 border-b border-violet-100 shrink-0">
-              <button onClick={handleOpenPrevDaf} className="flex-1 bg-violet-50 text-violet-700 border border-violet-100 rounded-2xl py-3 font-black active:scale-95 transition-all">‹ עמוד קודם</button>
-              <button onClick={handleOpenNextDaf} className="flex-1 bg-violet-600 text-white rounded-2xl py-3 font-black shadow active:scale-95 transition-all">עמוד הבא ›</button>
-            </div>
-          )}
-
-          <div className="flex bg-violet-50 shrink-0 overflow-x-auto custom-scrollbar border-b border-violet-100">
-            {(masterMode === 'daf_yomi'
-              ? [{ id: 'scan', label: 'צורת הדף' }, { id: 'gemara', label: 'גמרא' }, { id: 'explanation', label: 'ביאור' }, { id: 'rashi', label: 'רש\"י' }, { id: 'tosafot', label: 'תוספות' }]
-              : [{ id: 'tanya_original', label: 'תניא' }, { id: 'tanya_explanation', label: 'ביאור' }]
-            ).map(tab => (
-              <button key={tab.id} onClick={() => handleTabClick(tab.id)} className={`flex-1 min-w-[100px] py-4 text-sm font-black transition-all ${activeTab === tab.id ? 'bg-white text-violet-700 border-b-4 border-violet-600' : 'text-violet-400 hover:text-violet-600'}`}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {showNotes && (
-            <div className="bg-yellow-50 border-b border-yellow-200 p-4 shrink-0 animate-fade-in">
-              <label className="block text-right text-sm font-black text-yellow-800 mb-2">ההערה שלי לדף הזה</label>
-              <textarea
-                value={noteText}
-                onChange={(e) => saveNoteForRef(e.target.value)}
-                placeholder="כתוב כאן מחשבה, קושיה או סיכום..."
-                className="w-full min-h-[120px] resize-none rounded-2xl border-2 border-yellow-200 bg-white p-4 text-right text-lg leading-relaxed outline-none focus:border-yellow-400 shadow-sm"
-                dir="rtl"
-              />
-              <p className="text-xs font-bold text-yellow-700 mt-2 text-right">נשמר אוטומטית</p>
-            </div>
-          )}
-
-          <div className="flex-1 overflow-hidden bg-white">
-            {isTextLoading ? (
-              <div className="flex flex-col justify-center items-center h-full gap-5">
-                <div className="w-16 h-16 border-4 border-violet-200 border-b-violet-600 rounded-full animate-spin"></div>
-                <p className="font-black text-violet-400">מושך את התוכן...</p>
-              </div>
-            ) : activeTab === 'scan' ? (
-              <div className="portal-card custom-scrollbar">
-                <div className="paper-card p-7 flex flex-col justify-between text-center">
-                  <div>
-                    <div className="text-5xl mb-5">📄</div>
-                    <h3 className="text-3xl font-black text-violet-950 mb-3">צורת הדף</h3>
-                    <p className="text-lg font-bold text-violet-700 leading-relaxed">לצפייה בצורת הדף, פתח את הדף המתאים בפורטל הדף היומי.</p>
-                  </div>
-                  <div className="space-y-3 mt-8">
-                    <a href={textContents.scan_url || getDafYomiPageUrl(currentActiveRef)} target="_blank" rel="noopener noreferrer" className="block w-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white px-6 py-5 rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all">פתח בפורטל הדף היומי</a>
-                    <button onClick={() => fetchTextData('scan', currentActiveRef)} className="w-full bg-white text-violet-700 border-2 border-violet-100 px-6 py-4 rounded-[1.5rem] font-black text-base shadow-sm active:scale-95 transition-all">רענן קישור</button>
-                  </div>
-                </div>
-              </div>
-            ) : activeTab === 'tanya_original' || activeTab === 'tanya_explanation' ? (
-              <div className="portal-card custom-scrollbar">
-                <div className="paper-card p-7 flex flex-col justify-between text-center">
-                  <div>
-                    <div className="text-5xl mb-5">📘</div>
-                    <h3 className="text-3xl font-black text-violet-950 mb-3">תניא יומי</h3>
-                    <p className="text-lg font-bold text-violet-700 leading-relaxed">התניא נפתח ישירות באתר חב״ד כדי לקבל מקור יציב עם הטקסט, הביאור והשיעורים.</p>
-                    <p className="text-sm font-bold text-violet-400 mt-4 leading-relaxed">פתיחה פנימית עלולה להיחסם, לכן הכפתור פותח כרטיסייה חדשה.</p>
-                  </div>
-                  <div className="space-y-3 mt-8">
-                    <a href={CHABAD_TANYA_URL} target="_blank" rel="noopener noreferrer" className="block w-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white px-6 py-5 rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all">פתח תניא באתר חב״ד</a>
-                    <button onClick={() => setShowNotes(true)} className="w-full bg-white text-violet-700 border-2 border-violet-100 px-6 py-4 rounded-[1.5rem] font-black text-base shadow-sm active:scale-95 transition-all">פתח הערות לדף הזה</button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-8 text-right overflow-y-auto h-full custom-scrollbar leading-relaxed">
-                <div className="max-w-3xl mx-auto sefaria-text" dir="rtl">
-                  {textError && <div className="mb-6 p-5 rounded-3xl bg-yellow-50 border border-yellow-200 text-yellow-800 text-base font-bold leading-relaxed text-center">{textError}</div>}
-                  {textContents[activeTab]?.length ? textContents[activeTab].map((p, i) => (
-                    <p key={i} className="mb-8 p-6 bg-white rounded-3xl border border-violet-50 shadow-sm" dangerouslySetInnerHTML={{ __html: p }} />
-                  )) : !textError && <div className="text-center text-violet-400 font-black mt-20">אין תוכן להצגה כרגע.</div>}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {showHistoryModal && (
-        <div className="absolute inset-0 bg-white z-[101] flex flex-col animate-fade-in">
-          <div className="bg-violet-700 p-6 pt-10 text-white flex items-center justify-between shadow-xl">
-            <h2 className="text-2xl font-black underline decoration-violet-300">ההיסטוריה שלי</h2>
-            <button onClick={() => setShowHistoryModal(false)} className="bg-white/10 p-2 rounded-xl" aria-label="סגור היסטוריה">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-          </div>
-          <div className="p-6 overflow-y-auto grow custom-scrollbar bg-violet-50/30 text-center text-violet-400 font-black">
-            ההיסטוריה תישמר כאן בהמשך.
-          </div>
-        </div>
-      )}
     </div>
-  );
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tabGemara" onclick="setMaster('gemara')">גמרא</button>
+      <button class="mode-tab" id="tabTanya" onclick="setMaster('tanya')">תניא</button>
+      <button class="mode-tab" id="tabHistory" onclick="showHistory()">📋 היסטוריה</button>
+    </div>
+    <div class="cal-strip">
+      <div class="date-nav">
+        <button class="date-nav-btn" onclick="shiftDate(1)">‹</button>
+        <div class="date-display">
+          <div class="hdate" id="hebDateDisplay">טוען...</div>
+          <div class="gdate" id="gregDateDisplay"></div>
+        </div>
+        <button class="date-nav-btn" onclick="shiftDate(-1)">›</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="calContainer" class="heb-cal">
+    <div class="heb-cal-header">
+      <button class="month-nav" onclick="prevCalMonth()">›</button>
+      <div class="heb-month-title">
+        <span id="calMonthTitle">טוען...</span>
+        <span class="greg-sub" id="calGregSub"></span>
+      </div>
+      <button class="month-nav" onclick="nextCalMonth()">‹</button>
+    </div>
+    <div class="cal-weekdays">
+      <div class="cal-wd">א</div><div class="cal-wd">ב</div><div class="cal-wd">ג</div>
+      <div class="cal-wd">ד</div><div class="cal-wd">ה</div><div class="cal-wd">ו</div>
+      <div class="cal-wd">ש</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <div class="main" id="mainContent">
+    <div class="full-loader" id="mainLoader">
+      <div class="spin"></div>
+      <p>טוען לימוד יומי...</p>
+    </div>
+    <div id="mainBody" class="hidden fade">
+      <div id="errorBox" class="error-box hidden"></div>
+      <div class="study-card">
+        <div class="study-card-header">
+          <div class="study-card-label" id="studyCardLabel">דף יומי</div>
+          <div style="display:flex;gap:6px;">
+            <span id="masterBadge" class="study-type-badge badge-gemara">גמרא</span>
+            <span id="modeBadge" class="study-type-badge badge-daily">יומי</span>
+          </div>
+        </div>
+        <div class="study-card-body">
+          <div class="study-mode-row" style="margin-bottom:14px;">
+            <button class="study-mode-btn active" id="btnDaily" onclick="setMode('daily')">לימוד יומי</button>
+            <button class="study-mode-btn" id="btnCustom" onclick="setMode('custom')">בחירה חופשית</button>
+          </div>
+
+          <!-- DAILY VIEW -->
+          <div id="dailyView">
+            <div class="daf-title" id="dailyTitle">-</div>
+            <div class="daf-subtitle" id="dailySubtitle"></div>
+            <button class="learn-btn idle" id="learnBtn" onclick="toggleLearn()">
+              <span id="learnBtnText">סמן כנלמד</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+            </button>
+          </div>
+
+          <!-- CUSTOM VIEW -->
+          <div id="customView" class="hidden">
+            <div id="gemaraCustomPicker">
+              <div style="margin-bottom:10px;">
+                <select class="picker-select" id="customTractate" style="width:100%;margin-bottom:8px;"></select>
+              </div>
+              <div class="picker-row">
+                <button class="picker-btn" onclick="moveDaf(-1)">‹</button>
+                <select class="picker-select" id="customDaf"></select>
+                <select class="picker-select" id="customAmud" style="max-width:90px;">
+                  <option value="a">עמוד א'</option>
+                  <option value="b">עמוד ב'</option>
+                </select>
+                <button class="picker-btn" onclick="moveDaf(1)">›</button>
+              </div>
+            </div>
+            <div id="tanyaCustomPicker" class="hidden">
+              <div style="margin-bottom:10px;">
+                <select class="picker-select" id="customSection" style="width:100%;margin-bottom:8px;" onchange="onSectionChange()"></select>
+              </div>
+              <div class="picker-row">
+                <button class="picker-btn" onclick="moveTanya(-1)">‹</button>
+                <select class="picker-select" id="customChapter"></select>
+                <button class="picker-btn" onclick="moveTanya(1)">›</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="enter-btn" id="enterBtn" onclick="enterBeitMidrash()">
+        <span>היכנס לבית המדרש</span>
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 19l-7-7 7-7M18 5v14"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- STUDY OVERLAY -->
+<div class="overlay hidden" id="studyOverlay">
+  <div class="overlay-header">
+    <div class="overlay-top">
+      <div class="overlay-title">
+        <span>📚</span>
+        <span id="overlayTitle"></span>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button id="notesToggleBtn" onclick="toggleNotes()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:var(--gold2);border-radius:10px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Frank Ruhl Libre',serif;">📝</button>
+        <button class="overlay-close" onclick="closeOverlay()">סגור</button>
+      </div>
+    </div>
+    <div class="daf-nav" id="dafNav">
+      <button class="daf-nav-btn" onclick="navigateDaf(-1)">‹ עמוד קודם</button>
+      <button class="daf-nav-btn" onclick="navigateDaf(1)">עמוד הבא ›</button>
+    </div>
+  </div>
+  <div class="tabs" id="overlayTabs"></div>
+  <div id="notesArea" class="notes-area hidden">
+    <div class="notes-label">ההערות שלי</div>
+    <textarea class="notes-ta" id="notesTa" placeholder="כתוב כאן מחשבה, קושיה, חידוש..." oninput="saveNote()"></textarea>
+    <div style="font-size:11px;color:#aaa;text-align:left;margin-top:4px;">נשמר אוטומטית</div>
+  </div>
+  <div class="tab-content" id="tabContent"></div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="hist-modal hidden" id="histModal">
+  <div class="hist-header">
+    <div class="hist-title">📋 ההיסטוריה שלי</div>
+    <button class="hist-close" onclick="closeHistory()">סגור</button>
+  </div>
+  <div class="hist-content" id="histContent"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const TRACTATES=[
+  {he:'ברכות',en:'Berakhot',daf:64},{he:'שבת',en:'Shabbat',daf:157},{he:'עירובין',en:'Eruvin',daf:105},
+  {he:'פסחים',en:'Pesachim',daf:121},{he:'שקלים',en:'Shekalim',daf:22},{he:'יומא',en:'Yoma',daf:88},
+  {he:'סוכה',en:'Sukkah',daf:56},{he:'ביצה',en:'Beitzah',daf:40},{he:'ראש השנה',en:'Rosh_Hashanah',daf:35},
+  {he:'תענית',en:'Taanit',daf:31},{he:'מגילה',en:'Megillah',daf:32},{he:'מועד קטן',en:'Moed_Katan',daf:29},
+  {he:'חגיגה',en:'Chagigah',daf:27},{he:'יבמות',en:'Yevamot',daf:122},{he:'כתובות',en:'Ketubot',daf:112},
+  {he:'נדרים',en:'Nedarim',daf:91},{he:'נזיר',en:'Nazir',daf:66},{he:'סוטה',en:'Sotah',daf:49},
+  {he:'גיטין',en:'Gittin',daf:90},{he:'קידושין',en:'Kiddushin',daf:82},{he:'בבא קמא',en:'Bava_Kamma',daf:119},
+  {he:'בבא מציעא',en:'Bava_Metzia',daf:119},{he:'בבא בתרא',en:'Bava_Batra',daf:176},
+  {he:'סנהדרין',en:'Sanhedrin',daf:113},{he:'מכות',en:'Makkot',daf:24},{he:'שבועות',en:'Shevuot',daf:49},
+  {he:'עבודה זרה',en:'Avodah_Zarah',daf:76},{he:'הוריות',en:'Horayot',daf:14},{he:'זבחים',en:'Zevachim',daf:120},
+  {he:'מנחות',en:'Menachot',daf:110},{he:'חולין',en:'Chullin',daf:142},{he:'בכורות',en:'Bekhorot',daf:61},
+  {he:'ערכין',en:'Arakhin',daf:34},{he:'תמורה',en:'Temurah',daf:34},{he:'כריתות',en:'Keritot',daf:28},
+  {he:'מעילה',en:'Meilah',daf:22},{he:'תמיד',en:'Tamid',daf:10},{he:'מידות',en:'Middot',daf:4},
+  {he:'קינים',en:'Kinnim',daf:3},{he:'נידה',en:'Niddah',daf:73}
+];
+
+const TANYA_SECTIONS=[
+  {he:'ליקוטי אמרים',en:'Likutei_Amarim',max:53},
+  {he:'שער היחוד והאמונה',en:'Shaar_HaYichud_VeHaEmunah',max:12},
+  {he:'אגרת התשובה',en:'Iggeret_HaTeshuvah',max:12},
+  {he:'אגרת הקודש',en:'Iggeret_HaKodesh',max:32},
+  {he:'קונטרס אחרון',en:'Kuntres_Acharon',max:9}
+];
+
+// Correct cumulative daf-yomi page IDs
+// Each tractate starts at 2a. 2a=id_start, 2b=id_start+1, 3a=id_start+2...
+// Berakhot 2a = id 1
+const TRACTATE_ID_STARTS = (()=>{
+  let starts={};
+  let current=1;
+  for(const t of TRACTATES){
+    starts[t.en]=current;
+    // pages: 2a,2b,3a,...,maxDaf*b = (maxDaf-1)*2 pages total
+    current += (t.daf-1)*2;
+  }
+  return starts;
+})();
+
+function getDafYomiId(tractateEn, daf, amud){
+  const start = TRACTATE_ID_STARTS[tractateEn];
+  if(!start || daf<2) return null;
+  // daf 2a = start+0, daf 2b = start+1, daf 3a = start+2 ...
+  return start + (daf-2)*2 + (amud==='b'?1:0);
 }
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(<DafYomiApp />);
+function getDafYomiUrl(tractateEn, daf, amud){
+  const id = getDafYomiId(tractateEn, daf, amud);
+  if(!id) return 'https://daf-yomi.com/';
+  return `https://daf-yomi.com/DafYomi_Page.aspx?vt=1&id=${id}`;
 }
 
-</script></body>
+function parseDafRef(ref){
+  if(!ref) return null;
+  const s = String(ref).replace(/_/g,' ').trim();
+  const m = s.match(/^(.+?)\.(\d+)(a|b)$/i);
+  if(m) return {tractateEn:m[1].replace(/ /g,'_'), daf:parseInt(m[2]), amud:m[3].toLowerCase()};
+  // fallback: "Tractate Name 26a"
+  const m2 = s.match(/^(.+?)\s+(\d+)(a|b)$/i);
+  if(m2) return {tractateEn:m2[1].replace(/ /g,'_'), daf:parseInt(m2[2]), amud:m2[3].toLowerCase()};
+  return null;
+}
 
+function buildRef(tractateEn, daf, amud){ return `${tractateEn}.${daf}${amud}`; }
+
+function getAdjacentRef(ref, dir){
+  const p = parseDafRef(ref);
+  if(!p) return ref;
+  const idx = TRACTATES.findIndex(t=>t.en===p.tractateEn);
+  if(idx<0) return ref;
+  let {tractateEn,daf,amud}=p;
+  const maxDaf = TRACTATES[idx].daf;
+  if(dir>0){
+    if(amud==='a') amud='b';
+    else if(daf<maxDaf){daf++;amud='a';}
+    else if(TRACTATES[idx+1]){tractateEn=TRACTATES[idx+1].en;daf=2;amud='a';}
+  } else {
+    if(amud==='b') amud='a';
+    else if(daf>2){daf--;amud='b';}
+    else if(idx>0){tractateEn=TRACTATES[idx-1].en;daf=TRACTATES[idx-1].daf;amud='b';}
+  }
+  return buildRef(tractateEn,daf,amud);
+}
+
+function toGematria(n){
+  if(!n||n<=0) return '';
+  const U=['','א','ב','ג','ד','ה','ו','ז','ח','ט'];
+  const T=['','י','כ','ל','מ','נ','ס','ע','פ','צ'];
+  const H=['','ק','ר','ש','ת'];
+  const h=Math.floor(n/100),t=Math.floor((n%100)/10),u=n%10;
+  let s=H[h]||'';
+  if(t===1&&u===5) s+='טו';
+  else if(t===1&&u===6) s+='טז';
+  else s+=(T[t]||'')+(U[u]||'');
+  return s;
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let masterMode='gemara'; // 'gemara' | 'tanya'
+let studyMode='daily';   // 'daily' | 'custom'
+let dateOffset=0;
+let currentGregDate='';
+let currentHebDate='';
+let dailyDafRef='';
+let dailyDafHe='';
+let dailyTanyaHe='';
+
+let customTractateEn=TRACTATES[0].en;
+let customDaf=2;
+let customAmud='a';
+let customSectionEn=TANYA_SECTIONS[0].en;
+let customChapter=1;
+
+let calYear=new Date().getFullYear();
+let calMonth=new Date().getMonth(); // 0-based
+let calData={}; // date->hebDay mapping
+let learnedDates={};
+
+let overlayRef='';
+let overlayMaster='';
+let activeTab='';
+
+// ═══════════════════════════════════════════════
+// STORAGE HELPERS
+// ═══════════════════════════════════════════════
+function ls(k,def=''){try{return localStorage.getItem(k)||def;}catch(e){return def;}}
+function lss(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function getStreak(type){return parseInt(ls(`streak_${type}`,'0'),10)||0;}
+function setStreak(type,n){lss(`streak_${type}`,String(n));}
+function isLearned(dateKey,type){return ls(`learned_${type}_${dateKey}`)===`1`;}
+function setLearned(dateKey,type,v){lss(`learned_${type}_${dateKey}`,v?'1':'0');}
+function getNoteKey(ref){return `note_${ref}`;}
+function getNote(ref){return ls(getNoteKey(ref),'');}
+function saveNoteVal(ref,v){lss(getNoteKey(ref),v);}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{
+  buildTractateSelect();
+  buildDafSelect();
+  buildSectionSelect();
+  buildChapterSelect();
+  loadLearnedDates();
+  fetchDay();
+});
+
+function loadLearnedDates(){
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith('learned_')&&localStorage.getItem(k)==='1'){
+        const parts=k.split('_');
+        // format: learned_TYPE_DATEKEY
+        if(parts.length>=3){
+          const type=parts[1];
+          const dateKey=parts.slice(2).join('_');
+          learnedDates[dateKey+':'+type]=true;
+        }
+      }
+    }
+  }catch(e){}
+}
+
+function buildTractateSelect(){
+  const sel=document.getElementById('customTractate');
+  sel.innerHTML='';
+  TRACTATES.forEach(t=>{
+    const o=document.createElement('option');
+    o.value=t.en;o.textContent=t.he;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change',e=>{customTractateEn=e.target.value;customDaf=2;customAmud='a';buildDafSelect();});
+}
+function buildDafSelect(){
+  const t=TRACTATES.find(x=>x.en===customTractateEn);
+  const max=t?t.daf:64;
+  const sel=document.getElementById('customDaf');
+  const cur=customDaf;
+  sel.innerHTML='';
+  for(let i=2;i<=max;i++){
+    const o=document.createElement('option');
+    o.value=i;o.textContent=`דף ${toGematria(i)}`;
+    sel.appendChild(o);
+  }
+  sel.value=cur<=max?cur:2;
+  sel.addEventListener('change',e=>{customDaf=parseInt(e.target.value);});
+}
+function buildSectionSelect(){
+  const sel=document.getElementById('customSection');
+  sel.innerHTML='';
+  TANYA_SECTIONS.forEach(s=>{
+    const o=document.createElement('option');
+    o.value=s.en;o.textContent=s.he;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change',e=>{customSectionEn=e.target.value;customChapter=1;buildChapterSelect();});
+}
+function buildChapterSelect(){
+  const sec=TANYA_SECTIONS.find(s=>s.en===customSectionEn);
+  const max=sec?sec.max:53;
+  const sel=document.getElementById('customChapter');
+  sel.innerHTML='';
+  for(let i=1;i<=max;i++){
+    const o=document.createElement('option');
+    o.value=i;o.textContent=`פרק ${toGematria(i)}`;
+    sel.appendChild(o);
+  }
+  sel.value=customChapter<=max?customChapter:1;
+  sel.addEventListener('change',e=>{customChapter=parseInt(e.target.value);});
+}
+
+// ═══════════════════════════════════════════════
+// FETCH DAY
+// ═══════════════════════════════════════════════
+async function fetchDay(){
+  show('mainLoader');hide('mainBody');
+  const d=new Date();d.setDate(d.getDate()+dateOffset);
+  const y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
+  currentGregDate=`${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+  // Greg display
+  document.getElementById('gregDateDisplay').textContent=d.toLocaleDateString('he-IL');
+
+  // Sefaria calendars
+  try{
+    const res=await fetch(`https://www.sefaria.org/api/calendars?year=${y}&month=${m}&day=${day}`);
+    const data=await res.json();
+    if(data.calendar_items){
+      const dafItem=data.calendar_items.find(c=>c.title&&c.title.en==='Daf Yomi');
+      const tanyaItem=data.calendar_items.find(c=>c.title&&c.title.en==='Tanya Yomi');
+      if(dafItem){
+        dailyDafRef=dafItem.url||'';
+        dailyDafHe=dafItem.displayValue&&dafItem.displayValue.he?dafItem.displayValue.he:'';
+      }
+      if(tanyaItem){
+        dailyTanyaHe=tanyaItem.displayValue&&tanyaItem.displayValue.he?`תניא - ${tanyaItem.displayValue.he}`:'תניא יומי';
+      }
+    }
+  }catch(e){showError('לא הצלחתי לטעון מהשרת. מציג ברירת מחדל.');}
+
+  // Hebrew date
+  try{
+    const hres=await fetch(`https://www.hebcal.com/converter?cfg=json&date=${currentGregDate}&g2h=1&strict=1`);
+    const hdata=await hres.json();
+    if(hdata.hebrew){
+      currentHebDate=hdata.hebrew.replace(/[\u0591-\u05C7]/g,'');
+      document.getElementById('hebDateDisplay').textContent=currentHebDate;
+      // Calendar month/year from hebcal
+      if(hdata.hm&&hdata.hy){
+        calYear=y;calMonth=d.getMonth();
+      }
+    }
+  }catch(e){document.getElementById('hebDateDisplay').textContent=d.toLocaleDateString('he-IL');}
+
+  renderUI();
+  renderCalendar();
+  hide('mainLoader');show('mainBody');
+  document.getElementById('mainBody').classList.add('fade');
+}
+
+function renderUI(){
+  const type=masterMode==='gemara'?'gemara':'tanya';
+  const dateKey=currentGregDate;
+  const learned=isLearned(dateKey,type);
+  const streak=getStreak(type);
+  document.getElementById('streakNum').textContent=streak;
+
+  // badges
+  document.getElementById('masterBadge').textContent=masterMode==='gemara'?'גמרא':'תניא';
+  document.getElementById('masterBadge').className='study-type-badge '+(masterMode==='gemara'?'badge-gemara':'badge-tanya');
+  document.getElementById('modeBadge').textContent=studyMode==='daily'?'יומי':'אישי';
+  document.getElementById('modeBadge').className='study-type-badge '+(studyMode==='daily'?'badge-daily':'badge-custom');
+
+  if(studyMode==='daily'){
+    const title=masterMode==='gemara'?dailyDafHe:dailyTanyaHe;
+    document.getElementById('dailyTitle').textContent=title||'אין נתונים';
+    document.getElementById('dailySubtitle').textContent=masterMode==='gemara'&&dailyDafRef?`(${dailyDafRef.replace(/_/g,' ')})`:dateOffset===0?'לימוד היום':'';
+  }
+
+  const btn=document.getElementById('learnBtn');
+  const btnTxt=document.getElementById('learnBtnText');
+  if(learned){
+    btn.className='learn-btn done';
+    btnTxt.textContent='למדתי! ✓';
+  } else {
+    btn.className='learn-btn idle';
+    btnTxt.textContent='סמן כנלמד';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════
+const HEB_MONTHS_HE=['ניסן','אייר','סיון','תמוז','אב','אלול','תשרי','חשון','כסלו','טבת','שבט','אדר','אדר א׳','אדר ב׳'];
+const GREG_MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+
+async function renderCalendar(){
+  const d1=new Date(calYear,calMonth,1);
+  const totalDays=new Date(calYear,calMonth+1,0).getDate();
+  // Day of week for first (0=Sun..6=Sat)
+  let startDow=d1.getDay(); // 0=Sun
+
+  document.getElementById('calGregSub').textContent=`${GREG_MONTHS_HE[calMonth]} ${calYear}`;
+
+  // Build grid cells
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+
+  // Fetch Hebrew dates for this month if needed
+  const cacheKey=`${calYear}-${calMonth}`;
+  if(!calData[cacheKey]){
+    calData[cacheKey]={};
+    try{
+      // Fetch first, middle and last days to get Hebrew month name
+      const midDate=new Date(calYear,calMonth,15);
+      const ymid=midDate.getFullYear(),mmid=midDate.getMonth()+1,dmid=midDate.getDate();
+      const r=await fetch(`https://www.hebcal.com/converter?cfg=json&date=${ymid}-${String(mmid).padStart(2,'0')}-${String(dmid).padStart(2,'0')}&g2h=1&strict=1`);
+      const j=await r.json();
+      if(j.hm) document.getElementById('calMonthTitle').textContent=`${j.hm} ${j.hy}`;
+      else document.getElementById('calMonthTitle').textContent=`${GREG_MONTHS_HE[calMonth]} ${calYear}`;
+
+      // Batch: fetch a few sample days to map hd
+      const sampleDays=[1,8,15,22,totalDays];
+      const results=await Promise.all(sampleDays.map(async dd=>{
+        const dk=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+        try{
+          const rr=await fetch(`https://www.hebcal.com/converter?cfg=json&date=${dk}&g2h=1&strict=1`);
+          const jj=await rr.json();
+          return {day:dd,hd:jj.hd,hm:jj.hm};
+        }catch(e){return {day:dd,hd:dd,hm:''};}
+      }));
+      // Build simple approximation for all days
+      results.forEach(r=>{calData[cacheKey][r.day]=r.hd;});
+      // interpolate
+      for(let dd=1;dd<=totalDays;dd++){
+        if(!calData[cacheKey][dd]){
+          // find nearest sample
+          const s=results.reduce((a,b)=>Math.abs(b.day-dd)<Math.abs(a.day-dd)?b:a);
+          calData[cacheKey][dd]=((s.hd||1)+(dd-s.day)+29)%30||30;
+        }
+      }
+    }catch(e){
+      document.getElementById('calMonthTitle').textContent=`${GREG_MONTHS_HE[calMonth]} ${calYear}`;
+      for(let dd=1;dd<=totalDays;dd++) calData[cacheKey][dd]=dd;
+    }
+  }
+
+  // Blank cells for day-of-week alignment
+  for(let i=0;i<startDow;i++){
+    const blank=document.createElement('div');
+    blank.className='cal-cell empty';
+    grid.appendChild(blank);
+  }
+
+  const today=new Date();
+  const todayStr=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  for(let dd=1;dd<=totalDays;dd++){
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    const cell=document.createElement('div');
+    cell.className='cal-cell';
+    const dow=(startDow+dd-1)%7; // 0=Sun,6=Sat
+    if(dow===6) cell.classList.add('shabbat');
+    if(dateStr===todayStr&&dateOffset===0) cell.classList.add('today');
+    else if(dateStr===currentGregDate) cell.classList.add('selected');
+
+    // Check learned for gemara or tanya
+    const gLearned=isLearned(dateStr,'gemara');
+    const tLearned=isLearned(dateStr,'tanya');
+    if(gLearned||tLearned) cell.classList.add('learned');
+
+    const hd=calData[cacheKey]&&calData[cacheKey][dd]?toGematria(calData[cacheKey][dd]):String(dd);
+    cell.innerHTML=`<span class="hday">${hd}</span><span class="gday">${dd}</span>`;
+    cell.onclick=()=>selectCalDay(dateStr,dd);
+    grid.appendChild(cell);
+  }
+}
+
+function selectCalDay(dateStr, day){
+  // Calculate offset from today
+  const today=new Date();today.setHours(0,0,0,0);
+  const target=new Date(dateStr);target.setHours(0,0,0,0);
+  dateOffset=Math.round((target-today)/(1000*60*60*24));
+  fetchDay();
+}
+
+function prevCalMonth(){
+  calMonth--;if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+function nextCalMonth(){
+  calMonth++;if(calMonth>11){calMonth=0;calYear++;}
+  renderCalendar();
+}
+
+// ═══════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════
+function shiftDate(dir){
+  dateOffset+=dir;
+  fetchDay();
+}
+
+function setMaster(m){
+  masterMode=m;
+  document.getElementById('tabGemara').classList.toggle('active',m==='gemara');
+  document.getElementById('tabTanya').classList.toggle('active',m==='tanya');
+  // show/hide pickers
+  document.getElementById('gemaraCustomPicker').classList.toggle('hidden',m!=='gemara');
+  document.getElementById('tanyaCustomPicker').classList.toggle('hidden',m!=='tanya');
+  renderUI();
+}
+
+function setMode(m){
+  studyMode=m;
+  document.getElementById('btnDaily').classList.toggle('active',m==='daily');
+  document.getElementById('btnCustom').classList.toggle('active',m==='custom');
+  document.getElementById('dailyView').classList.toggle('hidden',m!=='daily');
+  document.getElementById('customView').classList.toggle('hidden',m!=='custom');
+  renderUI();
+}
+
+function moveDaf(dir){
+  if(dir>0){
+    if(customAmud==='a') customAmud='b';
+    else if(customDaf<(TRACTATES.find(t=>t.en===customTractateEn)||{daf:64}).daf){customDaf++;customAmud='a';}
+  } else {
+    if(customAmud==='b') customAmud='a';
+    else if(customDaf>2){customDaf--;customAmud='b';}
+  }
+  buildDafSelect();
+  document.getElementById('customDaf').value=customDaf;
+  document.getElementById('customAmud').value=customAmud;
+}
+function moveTanya(dir){
+  const max=(TANYA_SECTIONS.find(s=>s.en===customSectionEn)||{max:53}).max;
+  if(dir>0&&customChapter<max) customChapter++;
+  else if(dir<0&&customChapter>1) customChapter--;
+  document.getElementById('customChapter').value=customChapter;
+}
+function onSectionChange(){
+  customSectionEn=document.getElementById('customSection').value;
+  customChapter=1;
+  buildChapterSelect();
+}
+
+function toggleLearn(){
+  const type=masterMode==='gemara'?'gemara':'tanya';
+  const dateKey=currentGregDate;
+  const was=isLearned(dateKey,type);
+  const now=!was;
+  setLearned(dateKey,type,now);
+  const oldStreak=getStreak(type);
+  setStreak(type,now?oldStreak+1:Math.max(0,oldStreak-1));
+  if(now) learnedDates[dateKey+':'+type]=true;
+  else delete learnedDates[dateKey+':'+type];
+  renderUI();
+  renderCalendar();
+}
+
+// ═══════════════════════════════════════════════
+// BEIT MIDRASH ENTRY
+// ═══════════════════════════════════════════════
+function getCurrentRef(){
+  if(masterMode==='gemara'){
+    if(studyMode==='daily'){
+      if(!dailyDafRef) return null;
+      // Clean up the ref from Sefaria URL format
+      return dailyDafRef.replace(/^\/+/,'').replace(/\//g,'.');
+    }
+    const t=document.getElementById('customTractate').value||customTractateEn;
+    const d=parseInt(document.getElementById('customDaf').value)||customDaf;
+    const a=document.getElementById('customAmud').value||customAmud;
+    return buildRef(t,d,a);
+  } else {
+    if(studyMode==='daily') return 'tanya_daily';
+    const sec=document.getElementById('customSection').value||customSectionEn;
+    const ch=parseInt(document.getElementById('customChapter').value)||customChapter;
+    return `tanya_${sec}_${ch}`;
+  }
+}
+
+function getCurrentTitle(){
+  if(masterMode==='gemara'){
+    if(studyMode==='daily') return dailyDafHe||dailyDafRef;
+    const t=TRACTATES.find(x=>x.en===(document.getElementById('customTractate').value||customTractateEn));
+    const d=parseInt(document.getElementById('customDaf').value)||customDaf;
+    const a=document.getElementById('customAmud').value||customAmud;
+    return `${t?t.he:''} דף ${toGematria(d)} ע${a==='a'?'א':'ב'}`;
+  }
+  if(studyMode==='daily') return dailyTanyaHe||'תניא יומי';
+  const sec=TANYA_SECTIONS.find(s=>s.en===(document.getElementById('customSection').value||customSectionEn));
+  const ch=parseInt(document.getElementById('customChapter').value)||customChapter;
+  return `תניא - ${sec?sec.he:''} פרק ${toGematria(ch)}`;
+}
+
+function enterBeitMidrash(){
+  const ref=getCurrentRef();
+  if(!ref) return;
+  overlayRef=ref;
+  overlayMaster=masterMode;
+  document.getElementById('overlayTitle').textContent=getCurrentTitle();
+  document.getElementById('dafNav').classList.toggle('hidden',masterMode!=='gemara');
+  buildTabs();
+  show('studyOverlay');
+}
+
+function closeOverlay(){hide('studyOverlay');}
+
+// ═══════════════════════════════════════════════
+// TABS & TEXT
+// ═══════════════════════════════════════════════
+const TABS_GEMARA=[
+  {id:'scan',label:'צורת הדף'},
+  {id:'gemara',label:'גמרא'},
+  {id:'explanation',label:'ביאור'},
+  {id:'rashi',label:'רש"י'},
+  {id:'tosafot',label:'תוספות'}
+];
+const TABS_TANYA=[
+  {id:'tanya_orig',label:'תניא'},
+  {id:'tanya_explain',label:'ביאור'}
+];
+
+function buildTabs(){
+  const tabs=overlayMaster==='gemara'?TABS_GEMARA:TABS_TANYA;
+  const container=document.getElementById('overlayTabs');
+  container.innerHTML='';
+  tabs.forEach((t,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tab'+(i===0?' active':'');
+    btn.textContent=t.label;
+    btn.id='tab_'+t.id;
+    btn.onclick=()=>switchTab(t.id);
+    container.appendChild(btn);
+  });
+  activeTab=tabs[0].id;
+  loadTab(activeTab);
+  // notes
+  const noteKey=getNoteKey(overlayRef);
+  document.getElementById('notesTa').value=getNote(overlayRef);
+}
+
+function switchTab(tabId){
+  activeTab=tabId;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('tab_'+tabId);
+  if(btn) btn.classList.add('active');
+  loadTab(tabId);
+}
+
+async function loadTab(tabId){
+  const content=document.getElementById('tabContent');
+  if(tabId==='scan'){
+    const parsed=parseDafRef(overlayRef);
+    let url='https://daf-yomi.com/';
+    if(parsed){
+      url=getDafYomiUrl(parsed.tractateEn,parsed.daf,parsed.amud);
+    }
+    content.innerHTML=`<div class="portal-card">
+      <div class="portal-icon">📄</div>
+      <div class="portal-title">צורת הדף</div>
+      <div class="portal-desc">לצפייה בצורת הדף בפורטל הדף היומי עם כל הפרשנים</div>
+      <a href="${url}" target="_blank" rel="noopener" class="portal-btn">פתח פורטל הדף היומי</a>
+    </div>`;
+    return;
+  }
+  if(tabId==='tanya_orig'||tabId==='tanya_explain'){
+    content.innerHTML=`<div class="portal-card">
+      <div class="portal-icon">📘</div>
+      <div class="portal-title">תניא יומי</div>
+      <div class="portal-desc">הטקסט והביאור נפתחים ישירות באתר חב"ד עם כל הכלים</div>
+      <a href="https://he.chabad.org/dailystudy/tanya.htm" target="_blank" rel="noopener" class="portal-btn">פתח תניא באתר חב"ד</a>
+    </div>`;
+    return;
+  }
+  // Text tabs
+  content.innerHTML=`<div class="loader"><div class="spin"></div><p style="font-family:'Frank Ruhl Libre',serif;color:var(--ink3);">טוען...</p></div>`;
+  const url=buildTextUrl(tabId,overlayRef);
+  if(!url){content.innerHTML=`<div class="portal-card"><div class="portal-desc">אין תוכן להצגה בלשונית זו.</div></div>`;return;}
+  try{
+    const res=await fetch(url,{headers:{Accept:'application/json'}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const txt=await res.text();
+    if(!txt.trim()||txt.trim().startsWith('<')) throw new Error('לא JSON');
+    const data=JSON.parse(txt);
+    const arr=Array.isArray(data.he)?data.he.flat(Infinity):[data.he];
+    const paragraphs=arr.filter(p=>typeof p==='string'&&p.trim());
+    if(!paragraphs.length) throw new Error('אין תוכן');
+    content.innerHTML=`<div class="gemara-text" dir="rtl">${paragraphs.map(p=>`<p>${p}</p>`).join('')}</div>`;
+  }catch(e){
+    // Try fallback URLs
+    const fallbacks=buildFallbackUrls(tabId,overlayRef);
+    let found=false;
+    for(const fu of fallbacks){
+      try{
+        const r=await fetch(fu,{headers:{Accept:'application/json'}});
+        if(!r.ok) continue;
+        const t=await r.text();
+        if(!t.trim()||t.trim().startsWith('<')) continue;
+        const d=JSON.parse(t);
+        const a=Array.isArray(d.he)?d.he.flat(Infinity):[d.he];
+        const p=a.filter(x=>typeof x==='string'&&x.trim());
+        if(p.length){
+          content.innerHTML=`<div class="gemara-text" dir="rtl">${p.map(x=>`<p>${x}</p>`).join('')}</div>`;
+          found=true;break;
+        }
+      }catch(ee){}
+    }
+    if(!found){
+      content.innerHTML=`<div class="portal-card">
+        <div class="portal-icon">🔍</div>
+        <div class="portal-title">לא נמצא תוכן</div>
+        <div class="portal-desc">${e.message||'לא הצלחתי לטעון תוכן לדף הזה ממאגר ספריא'}</div>
+        <a href="https://www.sefaria.org/${encodeURIComponent(overlayRef)}" target="_blank" rel="noopener" class="portal-btn">פתח בספריא ישירות</a>
+      </div>`;
+    }
+  }
+}
+
+function buildTextUrl(tabId,ref){
+  const clean=ref.replace(/\//g,'.');
+  const enc=encodeURIComponent(clean);
+  if(tabId==='gemara') return `https://www.sefaria.org/api/texts/${enc}`;
+  if(tabId==='explanation') return `https://www.sefaria.org/api/texts/Steinsaltz_on_${enc}`;
+  if(tabId==='rashi') return `https://www.sefaria.org/api/texts/Rashi_on_${enc}`;
+  if(tabId==='tosafot') return `https://www.sefaria.org/api/texts/Tosafot_on_${enc}`;
+  return '';
+}
+
+function buildFallbackUrls(tabId,ref){
+  if(tabId!=='tosafot') return [];
+  const clean=ref.replace(/\//g,'.');
+  const noAmud=clean.replace(/\.[0-9]+(a|b)$/,'');
+  return [
+    `https://www.sefaria.org/api/texts/Tosafot_on_${encodeURIComponent(noAmud)}`,
+    `https://www.sefaria.org/api/texts/Tosafot%20on%20${encodeURIComponent(clean.replace('.',' '))}`,
+  ];
+}
+
+function navigateDaf(dir){
+  if(overlayMaster!=='gemara') return;
+  overlayRef=getAdjacentRef(overlayRef,dir);
+  const parsed=parseDafRef(overlayRef);
+  if(parsed){
+    const t=TRACTATES.find(x=>x.en===parsed.tractateEn);
+    document.getElementById('overlayTitle').textContent=`${t?t.he:parsed.tractateEn} דף ${toGematria(parsed.daf)} ע${parsed.amud==='a'?'א':'ב'}`;
+  }
+  loadTab(activeTab);
+}
+
+function toggleNotes(){
+  const area=document.getElementById('notesArea');
+  area.classList.toggle('hidden');
+}
+
+function saveNote(){
+  const v=document.getElementById('notesTa').value;
+  saveNoteVal(overlayRef,v);
+}
+
+// ═══════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════
+function showHistory(){
+  const container=document.getElementById('histContent');
+  const entries=[];
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith('learned_')&&localStorage.getItem(k)==='1'){
+        const parts=k.split('_');
+        if(parts.length>=3){
+          const type=parts[1];
+          const dateKey=parts.slice(2).join('_');
+          entries.push({type,dateKey});
+        }
+      }
+    }
+  }catch(e){}
+
+  entries.sort((a,b)=>b.dateKey.localeCompare(a.dateKey));
+
+  if(!entries.length){
+    container.innerHTML=`<div style="text-align:center;color:var(--ink3);padding:40px;font-family:'Noto Serif Hebrew',serif;font-size:18px;">עדיין לא סימנת לימודים</div>`;
+  } else {
+    container.innerHTML=entries.map(e=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:white;border-radius:12px;margin-bottom:8px;border:1px solid var(--parchment3);">
+        <span style="font-family:'Noto Serif Hebrew',serif;font-size:15px;font-weight:700;">${e.dateKey}</span>
+        <span style="background:${e.type==='gemara'?'rgba(26,58,124,0.1)':'rgba(26,92,58,0.1)'};color:${e.type==='gemara'?'var(--blue)':'var(--green)'};padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;">${e.type==='gemara'?'גמרא':'תניא'} ✓</span>
+      </div>
+    `).join('');
+  }
+  show('histModal');
+}
+function closeHistory(){hide('histModal');}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function show(id){document.getElementById(id).classList.remove('hidden');}
+function hide(id){document.getElementById(id).classList.add('hidden');}
+function showError(msg){
+  const b=document.getElementById('errorBox');
+  b.textContent=msg;b.classList.remove('hidden');
+}
+</script>
+</body>
 </html>
