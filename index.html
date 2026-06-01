@@ -1,593 +1,228 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>בית המדרש הדיגיטלי</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Noto+Serif+Hebrew:wght@300;400;600;900&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Secular+One&display=swap" rel="stylesheet" />
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#1a0a2e;
-  --ink2:#3d2b5e;
-  --ink3:#6b4f8c;
-  --gold:#c9a227;
-  --gold2:#e8c84a;
-  --gold3:#f5e89a;
-  --parchment:#faf6ee;
-  --parchment2:#f0e8d4;
-  --parchment3:#e4d5b8;
-  --cream:#fff9f0;
-  --red:#8b1a1a;
-  --green:#1a5c3a;
-  --blue:#1a3a7c;
-  --radius:16px;
-  --shadow:0 4px 32px rgba(26,10,46,0.18);
+  --bg:#fff7ef;
+  --card:#ffffff;
+  --card2:#fff1e3;
+  --ink:#241015;
+  --muted:#8b6f6c;
+  --line:#f0d8c7;
+  --navy:#6d1d2b;
+  --navy2:#a43a4f;
+  --gold:#ffb84d;
+  --gold2:#ffe1a6;
+  --green:#2f8f6b;
+  --blue:#b64662;
+  --red:#d94b4b;
+  --shadow:0 28px 80px rgba(109,29,43,.18);
+  --soft:0 14px 38px rgba(109,29,43,.12);
+  --r:30px;
 }
+html,body{min-height:100%}
 body{
-  font-family:'Frank Ruhl Libre',serif;
-  background:var(--parchment);
   min-height:100vh;
   direction:rtl;
   color:var(--ink);
+  font-family:'Heebo',sans-serif;
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% -5%,rgba(255,184,77,.32),transparent 38%),
+    radial-gradient(circle at 14% 22%,rgba(164,58,79,.18),transparent 30%),
+    radial-gradient(circle at 88% 72%,rgba(255,143,97,.16),transparent 32%),
+    linear-gradient(180deg,#fff9f2 0%,#fff0e5 100%);
   overflow-x:hidden;
 }
-
-/* BG texture */
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;
-  background:
-    radial-gradient(ellipse at 20% 10%, rgba(201,162,39,0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 90%, rgba(139,26,26,0.08) 0%, transparent 50%),
-    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(26,10,46,0.04) 39px,rgba(26,10,46,0.04) 40px),
-    repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(26,10,46,0.03) 79px,rgba(26,10,46,0.03) 80px);
-  pointer-events:none;
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:radial-gradient(rgba(109,29,43,.08) 1px,transparent 1px);
+  background-size:26px 26px;
+  mask-image:linear-gradient(180deg,black,transparent 78%);
 }
-
-#app{position:relative;z-index:1;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
-
-/* HEADER */
-.header{
-  background:linear-gradient(160deg, var(--ink) 0%, var(--ink2) 100%);
-  padding:20px 20px 0;
-  border-bottom:3px solid var(--gold);
-  position:relative;overflow:hidden;
+button,select,textarea{font-family:inherit}
+button{border:0;cursor:pointer}
+#app{
+  position:relative;z-index:1;
+  width:min(100%,520px);
+  margin:0 auto;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:18px 14px;
 }
-.header::before{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(201,162,39,0.04) 20px,rgba(201,162,39,0.04) 21px);
-}
-.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative;z-index:1;}
-.logo{
-  font-family:'Noto Serif Hebrew',serif;
-  font-size:22px;font-weight:900;
-  color:var(--gold2);
-  letter-spacing:0.02em;
-  text-shadow:0 2px 8px rgba(0,0,0,0.4);
-}
-.logo span{color:white;font-weight:300;}
-.streak-badge{
-  background:rgba(201,162,39,0.2);
-  border:1px solid rgba(201,162,39,0.4);
-  border-radius:20px;padding:6px 14px;
-  display:flex;align-items:center;gap:6px;
-  color:var(--gold2);font-size:18px;font-weight:700;
-}
-.streak-badge svg{width:18px;height:18px;fill:var(--gold2);}
-
-/* MODE TABS */
-.mode-tabs{
-  display:flex;gap:4px;background:rgba(255,255,255,0.07);
-  border-radius:14px;padding:4px;margin-bottom:0;position:relative;z-index:1;
-}
-.mode-tab{
-  flex:1;padding:10px 8px;border:none;cursor:pointer;
-  border-radius:10px;font-family:'Frank Ruhl Libre',serif;
-  font-size:15px;font-weight:600;transition:all 0.2s;
-  color:rgba(255,255,255,0.5);background:transparent;
-}
-.mode-tab.active{
-  background:var(--gold);color:var(--ink);
-  font-weight:700;box-shadow:0 2px 12px rgba(201,162,39,0.4);
-}
-
-/* CALENDAR STRIP */
-.cal-strip{
-  padding:0 20px;margin-top:0;
-  background:linear-gradient(180deg, var(--ink2) 0%, var(--ink) 100%);
-  padding-bottom:4px;
-}
-
-/* HEBREW CALENDAR */
-.heb-cal{
-  background:var(--parchment);
-  border:2px solid var(--gold);
-  border-top:none;
-  border-radius:0 0 20px 20px;
+.app-shell{
+  width:100%;
+  min-height:calc(100vh - 36px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
   overflow:hidden;
+  border:1px solid rgba(214,178,94,.35);
+  border-radius:36px;
+  background:rgba(255,255,255,.82);
   box-shadow:var(--shadow);
+  backdrop-filter:blur(14px);
 }
-.heb-cal-header{
-  background:var(--parchment2);
-  border-bottom:1.5px solid var(--parchment3);
-  padding:10px 16px;
-  display:flex;align-items:center;justify-content:space-between;
+.hero{
+  position:relative;overflow:hidden;
+  width:100%;
+  padding:26px 18px 18px;
+  color:white;
+  background:linear-gradient(145deg,#6d1d2b 0%,#a43a4f 58%,#c65a45 100%);
+  border-bottom:3px solid var(--gold);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
 }
-.heb-cal-header .month-nav{
-  background:none;border:none;cursor:pointer;
-  color:var(--ink2);font-size:20px;padding:2px 8px;
-  border-radius:6px;transition:background 0.15s;
-  font-family:'Frank Ruhl Libre',serif;
-}
-.heb-cal-header .month-nav:hover{background:var(--parchment3);}
-.heb-month-title{
-  font-family:'Noto Serif Hebrew',serif;
-  font-size:16px;font-weight:700;color:var(--ink);
-  text-align:center;
-}
-.heb-month-title .greg-sub{
-  display:block;font-size:11px;color:var(--ink3);font-weight:400;margin-top:1px;
-}
-.cal-weekdays{
-  display:grid;grid-template-columns:repeat(7,1fr);
-  background:var(--parchment2);
-  border-bottom:1px solid var(--parchment3);
-}
-.cal-wd{
-  text-align:center;padding:6px 2px;
-  font-size:11px;font-weight:600;color:var(--ink3);
-  font-family:'Noto Serif Hebrew',serif;
-}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:4px;}
-.cal-cell{
-  aspect-ratio:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  border-radius:10px;cursor:pointer;
-  transition:all 0.15s;position:relative;
-  padding:2px 0;
-}
-.cal-cell:hover:not(.empty){background:var(--parchment2);}
-.cal-cell.empty{cursor:default;}
-.cal-cell.today{background:var(--ink);color:white;}
-.cal-cell.today .hday{color:rgba(255,255,255,0.7);}
-.cal-cell.today .gday{color:white;}
-.cal-cell.learned{background:var(--green);color:white;}
-.cal-cell.learned .hday{color:rgba(255,255,255,0.8);}
-.cal-cell.learned .gday{color:white;}
-.cal-cell.learned::after{
-  content:'✓';
-  position:absolute;top:2px;left:3px;
-  font-size:9px;color:rgba(255,255,255,0.9);font-weight:700;
-}
-.cal-cell.shabbat:not(.today):not(.learned) .gday{color:var(--red);}
-.cal-cell.shabbat:not(.today):not(.learned) .hday{color:var(--red);}
-.cal-cell.selected:not(.today):not(.learned){
-  background:rgba(201,162,39,0.25);
-  border:1.5px solid var(--gold);
-}
-.hday{font-size:11px;color:var(--ink3);line-height:1;font-family:'Noto Serif Hebrew',serif;font-weight:500;}
-.gday{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2;}
+.hero:before{content:"";position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:310px;height:310px;border-radius:999px;background:radial-gradient(circle,rgba(241,215,138,.30),transparent 68%)}
+.topbar{position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;margin-bottom:18px}
+.brand{text-align:center;line-height:1.08}.brand strong{display:block;font-family:'Secular One','Heebo',sans-serif;font-size:30px;font-weight:900;color:var(--gold2);letter-spacing:.01em}.brand span{display:block;margin-top:6px;font-size:14px;color:rgba(255,255,255,.75)}
+.streak{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:92px;height:40px;background:rgba(255,255,255,.11);border:1px solid rgba(241,215,138,.42);border-radius:999px;color:var(--gold2);font-weight:900;box-shadow:0 10px 24px rgba(0,0,0,.12)}
+.streak svg{width:18px;height:18px;fill:currentColor}
+.mode-tabs{position:relative;z-index:1;width:100%;max-width:430px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:7px;border-radius:22px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16)}
+.mode-tab{height:44px;border-radius:16px;background:transparent;color:rgba(255,255,255,.72);font-size:16px;font-weight:900;transition:.18s;text-align:center}.mode-tab.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);box-shadow:0 10px 22px rgba(214,178,94,.24)}.mode-tab.history{padding:0;color:rgba(255,255,255,.82);border:1px solid rgba(241,215,138,.20)}
+.today-panel{position:relative;z-index:1;width:100%;max-width:430px;margin:16px auto 0;padding:16px;border-radius:26px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);text-align:center}
+.date-line{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:10px}.date-nav-btn{width:44px;height:44px;border-radius:16px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.12);color:white;font-size:22px}.date-center{text-align:center;min-width:0}.date-center .hdate{font-family:'Secular One','Heebo',sans-serif;color:#fff;font-size:20px;font-weight:900}.date-center .gdate{font-size:13px;color:rgba(255,255,255,.68);margin-top:3px}.calendar-toggle{margin:14px auto 0;width:100%;max-width:260px;height:40px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);color:var(--gold2);font-weight:900;font-size:14px;text-align:center}
+.main{width:100%;max-width:430px;flex:1;padding:18px 14px 22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:16px;text-align:center}.hidden{display:none!important}.fade{animation:fade .24s ease-out}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.full-loader,.loader{width:100%;min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:36px;color:var(--muted);font-weight:900;text-align:center}.spin{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+#mainBody{width:100%;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+.study-card{width:100%;background:var(--card);border:1px solid rgba(214,178,94,.35);border-radius:30px;box-shadow:var(--soft);overflow:hidden;text-align:center}.study-card-header{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:16px;background:linear-gradient(180deg,#fff8ef,#fff0e3);border-bottom:1px solid var(--line);text-align:center}.study-card-label{font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.10em}.badges{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}.badge{font-size:12px;padding:5px 12px;border-radius:999px;font-weight:900}.badge-gemara{background:rgba(164,58,79,.13);color:var(--blue)}.badge-tanya{background:rgba(36,115,77,.12);color:var(--green)}.badge-daily{background:rgba(214,178,94,.18);color:#73540d}.badge-custom{background:rgba(109,29,43,.10);color:var(--navy2)}.study-card-body{padding:18px;text-align:center}.study-mode-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#fff0e5;border:1px solid var(--line);border-radius:18px;padding:5px;margin:0 auto 16px;max-width:360px}.study-mode-btn{height:42px;border-radius:14px;background:transparent;color:var(--muted);font-size:15px;font-weight:900;text-align:center}.study-mode-btn.active{background:white;color:var(--ink);box-shadow:0 8px 18px rgba(109,29,43,.08)}
+.daily-block{position:relative;overflow:hidden;border-radius:26px;background:linear-gradient(180deg,#fff,#fff5ec);border:1px solid var(--line);padding:24px 18px;text-align:center}.daily-title{font-family:'Secular One','Heebo',sans-serif;font-size:34px;line-height:1.18;font-weight:900;color:var(--ink);margin:0 auto 9px;text-align:center}.daily-subtitle{font-size:14px;color:var(--muted);font-weight:800;min-height:20px;text-align:center}.quick-actions{display:grid;grid-template-columns:1fr;gap:10px;margin:18px auto 0;max-width:310px}.learn-btn,.open-btn{width:100%;height:50px;border-radius:18px;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center}.learn-btn.idle{background:linear-gradient(135deg,#6d1d2b,#a43a4f);color:#fff4d6}.learn-btn.done{background:var(--green);color:white}.open-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);box-shadow:0 10px 22px rgba(214,178,94,.24)}
+.picker-row{display:flex;justify-content:center;align-items:center;gap:8px}.picker-btn{width:44px;height:44px;background:white;border:1px solid var(--line);border-radius:16px;color:var(--navy2);font-size:18px;font-weight:900}.picker-select{width:100%;height:46px;background:white;border:1.5px solid var(--line);border-radius:16px;padding:0 12px;color:var(--ink);font-size:15px;font-weight:900;outline:none;text-align:center;text-align-last:center;appearance:none}.picker-select:focus{border-color:var(--gold)}
+.enter-btn{width:100%;max-width:340px;height:60px;border-radius:22px;background:linear-gradient(135deg,#6d1d2b,#a43a4f,#c65a45);color:var(--gold2);font-size:20px;font-family:'Secular One','Heebo',sans-serif;font-weight:900;box-shadow:0 14px 30px rgba(109,29,43,.24);text-align:center}.enter-btn:active,.open-btn:active,.learn-btn:active{transform:scale(.985)}
+.error-box{width:100%;background:#fff8e5;border:1px solid #ead69a;border-radius:18px;padding:13px 15px;color:#765400;font-size:13px;line-height:1.6;font-weight:900;text-align:center}
+.cal-drawer{width:calc(100% - 28px);max-width:430px;margin:0 auto 16px;border-radius:28px;overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:var(--soft);text-align:center}.cal-head{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:10px;padding:14px;background:linear-gradient(180deg,#fff8ef,#fff0e3);border-bottom:1px solid var(--line)}.month-nav{width:42px;height:42px;border-radius:15px;background:white;border:1px solid var(--line);font-size:18px;color:var(--ink);text-align:center}.cal-title{text-align:center;font-weight:900;font-family:'Secular One','Heebo',sans-serif}.cal-title span{display:block;font-family:'Heebo';font-size:12px;font-weight:800;color:var(--muted);margin-top:2px}.cal-weekdays,.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}.cal-wd{text-align:center;padding:9px 0 5px;font-size:11px;color:var(--muted);font-weight:900}.cal-grid{padding:7px 9px 12px}.cal-cell{aspect-ratio:1;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative;text-align:center}.cal-cell:not(.empty):hover{background:#fff0e5}.cal-cell.empty{opacity:0}.cal-cell.today{background:var(--navy);color:white}.cal-cell.selected:not(.today):not(.learned){outline:2px solid var(--gold);background:rgba(214,178,94,.15)}.cal-cell.learned{background:var(--green);color:white}.cal-cell.learned:after{content:"✓";position:absolute;left:5px;top:3px;font-size:10px;font-weight:900}.cal-cell.shabbat:not(.today):not(.learned){color:var(--red)}.hday{font-size:10px;color:currentColor;opacity:.68;font-family:'Secular One','Heebo';text-align:center}.gday{font-size:14px;font-weight:900;color:currentColor;text-align:center}
+.overlay,.hist-modal{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;animation:slideUp .25s ease-out;text-align:center}@keyframes slideUp{from{transform:translateY(100%);opacity:.8}to{transform:none;opacity:1}}.overlay-header,.hist-header{width:100%;background:linear-gradient(145deg,var(--navy),var(--navy2));padding:18px 14px 0;border-bottom:3px solid var(--gold);color:white;text-align:center}.overlay-top,.hist-top{width:100%;max-width:560px;margin:0 auto 13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}.overlay-title,.hist-title{max-width:100%;font-family:'Secular One','Heebo',sans-serif;font-size:21px;font-weight:900;color:var(--gold2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}.overlay-actions{display:flex;justify-content:center;align-items:center;gap:8px;flex-shrink:0}.small-dark{height:38px;padding:0 15px;border-radius:14px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);color:white;font-weight:900;text-align:center}.notes-btn{color:var(--gold2)}.daf-nav{width:100%;max-width:430px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:13px}.daf-nav-btn{height:43px;border-radius:15px;background:rgba(255,255,255,.09);border:1px solid rgba(241,215,138,.25);color:var(--gold2);font-size:15px;font-weight:900;text-align:center}.tabs{width:100%;display:flex;justify-content:center;background:white;border-bottom:1px solid var(--line);overflow-x:auto}.tab{flex:1;min-width:82px;max-width:140px;height:46px;background:white;color:#777f90;border-bottom:3px solid transparent;font-size:14px;font-weight:900;text-align:center}.tab.active{color:var(--ink);border-bottom-color:var(--gold)}.tab-content{width:100%;max-width:760px;flex:1;overflow-y:auto;padding:18px;text-align:center}.gemara-text{font-family:'Secular One','Heebo',sans-serif;font-size:20px;line-height:2.05;color:var(--ink);text-align:center}.gemara-text p{background:white;border:1px solid var(--line);border-top:5px solid var(--gold);border-radius:22px;padding:18px;margin:0 auto 16px;max-width:680px;text-align:center}.gemara-text b{font-weight:900;color:var(--ink)}.portal-card{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;min-height:62vh}.portal-box{width:100%;max-width:420px;background:white;border:1px solid var(--line);border-radius:30px;padding:28px 22px;box-shadow:var(--soft);text-align:center}.portal-mark{width:58px;height:58px;border-radius:21px;margin:0 auto 14px;background:linear-gradient(135deg,#6d1d2b,#a43a4f,#c65a45);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-family:'Secular One','Heebo';font-weight:900;font-size:24px}.portal-title{font-family:'Secular One','Heebo',sans-serif;font-size:26px;font-weight:900;margin-bottom:9px;text-align:center}.portal-desc{font-size:15px;color:var(--muted);line-height:1.7;font-weight:800;text-align:center}.portal-btn{display:flex;align-items:center;justify-content:center;text-decoration:none;height:53px;border-radius:19px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-family:'Secular One','Heebo';font-size:18px;font-weight:900;margin:16px auto 0;text-align:center}.portal-secondary{background:linear-gradient(135deg,#6d1d2b,#a43a4f);color:#fff4d6;margin-top:9px}.notes-area{width:100%;padding:13px 14px;background:#fff8e5;border-bottom:1px solid #ead69a;text-align:center}.notes-label{font-size:13px;color:#765400;font-weight:900;margin-bottom:7px;text-align:center}.notes-ta{width:100%;max-width:560px;min-height:98px;resize:vertical;background:white;border:1px solid #ead69a;border-radius:17px;padding:12px;color:var(--ink);font-size:16px;line-height:1.6;outline:none;text-align:center}.hist-header{padding:20px 16px}.hist-content{width:100%;max-width:520px;flex:1;overflow:auto;padding:18px;text-align:center}.hist-row{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:white;border:1px solid var(--line);border-radius:20px;padding:15px;margin:0 auto 10px;text-align:center}.hist-row strong{font-family:'Secular One','Heebo';font-size:16px}.hist-row span{font-size:12px;font-weight:900;border-radius:999px;padding:5px 12px}.hist-g{background:rgba(164,58,79,.13);color:var(--blue)}.hist-t{background:rgba(36,115,77,.12);color:var(--green)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#e8c1b3;border-radius:99px}
+@media (max-width:390px){#app{padding:0}.app-shell{border-radius:0;min-height:100vh}.brand strong{font-size:27px}.daily-title{font-size:29px}.mode-tab{font-size:15px}.quick-actions{max-width:none}}
 
-/* MAIN CONTENT */
-.main{flex:1;padding:16px 20px 24px;display:flex;flex-direction:column;gap:14px;}
+/* young warm theme override */
+.brand strong{font-size:32px;letter-spacing:-.04em;color:#fff4d6;text-shadow:0 10px 26px rgba(0,0,0,.18)}
+.brand span{font-family:'Heebo',sans-serif;font-weight:700;color:rgba(255,255,255,.82)}
+.hero{border-bottom:0;border-radius:0 0 34px 34px;box-shadow:0 20px 50px rgba(109,29,43,.18)}
+.hero:after{content:"";position:absolute;inset:auto -40px -90px -40px;height:160px;background:radial-gradient(closest-side,rgba(255,225,166,.28),transparent);pointer-events:none}
+.app-shell{background:rgba(255,250,245,.88);border-color:rgba(255,184,77,.34)}
+.study-card,.cal-drawer,.portal-box{border-color:rgba(255,184,77,.36)}
+.daily-title{letter-spacing:-.05em;color:#331018}
+.open-btn,.mode-tab.active,.portal-btn{background:linear-gradient(135deg,#ffb84d 0%,#ffda7a 48%,#fff0b8 100%);box-shadow:0 14px 28px rgba(255,184,77,.28)}
+.enter-btn{background:linear-gradient(135deg,#6d1d2b 0%,#a43a4f 54%,#c65a45 100%);color:#fff4d6}
+.learn-btn.done{background:linear-gradient(135deg,#2f8f6b,#43b883)}
+.tab.active{color:#6d1d2b;border-bottom-color:#ffb84d;background:#fff7ef}
+.gemara-text p{border-top-color:#ffb84d}
+.portal-mark{background:linear-gradient(135deg,#6d1d2b,#a43a4f,#c65a45);color:#fff4d6}
 
-/* STUDY CARD */
-.study-card{
-  background:white;
-  border-radius:20px;
-  border:1.5px solid var(--parchment3);
-  box-shadow:0 2px 16px rgba(26,10,46,0.08);
-  overflow:hidden;
-}
-.study-card-header{
-  background:linear-gradient(135deg, var(--parchment2) 0%, var(--parchment) 100%);
-  border-bottom:1px solid var(--parchment3);
-  padding:12px 16px;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.study-card-label{
-  font-size:11px;font-weight:700;letter-spacing:0.08em;
-  color:var(--ink3);text-transform:uppercase;
-}
-.study-type-badge{
-  font-size:11px;padding:3px 10px;border-radius:20px;
-  font-weight:700;
-}
-.badge-gemara{background:rgba(26,58,124,0.12);color:var(--blue);}
-.badge-tanya{background:rgba(26,92,58,0.12);color:var(--green);}
-.badge-daily{background:rgba(201,162,39,0.15);color:#7a5c00;}
-.badge-custom{background:rgba(107,79,140,0.12);color:var(--ink2);}
-
-.study-card-body{padding:16px;}
-.daf-title{
-  font-family:'Noto Serif Hebrew',serif;
-  font-size:28px;font-weight:900;
-  color:var(--ink);line-height:1.2;margin-bottom:4px;
-}
-.daf-subtitle{font-size:13px;color:var(--ink3);font-weight:400;}
-
-/* LEARN BUTTON */
-.learn-btn{
-  width:100%;padding:14px;border:none;cursor:pointer;
-  border-radius:14px;font-family:'Frank Ruhl Libre',serif;
-  font-size:17px;font-weight:700;transition:all 0.2s;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  margin-top:12px;
-}
-.learn-btn.idle{
-  background:var(--ink);color:var(--gold2);
-  border:1.5px solid var(--ink);
-}
-.learn-btn.idle:hover{background:var(--ink2);}
-.learn-btn.done{
-  background:var(--green);color:white;
-}
-.learn-btn svg{width:20px;height:20px;}
-
-/* ENTER BTN */
-.enter-btn{
-  width:100%;padding:16px;border:none;cursor:pointer;
-  background:linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
-  color:var(--ink);
-  border-radius:16px;font-family:'Noto Serif Hebrew',serif;
-  font-size:19px;font-weight:900;
-  box-shadow:0 4px 20px rgba(201,162,39,0.35);
-  transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;
-  letter-spacing:0.02em;
-}
-.enter-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(201,162,39,0.45);}
-.enter-btn:active{transform:scale(0.98);}
-.enter-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
-
-/* CUSTOM PICKER */
-.picker-row{display:flex;gap:8px;align-items:center;}
-.picker-btn{
-  background:white;border:1.5px solid var(--parchment3);
-  border-radius:10px;padding:8px 12px;cursor:pointer;
-  color:var(--ink2);font-size:16px;font-weight:700;
-  transition:all 0.15s;font-family:'Frank Ruhl Libre',serif;
-}
-.picker-btn:hover{background:var(--parchment2);}
-.picker-select{
-  flex:1;background:white;border:1.5px solid var(--parchment3);
-  border-radius:10px;padding:10px 12px;
-  font-family:'Frank Ruhl Libre',serif;font-size:14px;font-weight:600;
-  color:var(--ink);direction:rtl;outline:none;cursor:pointer;
-  appearance:none;text-align:center;
-}
-.picker-select:focus{border-color:var(--gold);}
-
-/* STUDY VIEW OVERLAY */
-.overlay{
-  position:fixed;inset:0;z-index:200;
-  background:var(--parchment);
-  display:flex;flex-direction:column;
-  animation:slideUp 0.3s ease-out;
-}
-@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.overlay-header{
-  background:var(--ink);
-  padding:16px 16px 0;
-  border-bottom:2px solid var(--gold);
-}
-.overlay-top{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:12px;
-}
-.overlay-title{
-  font-family:'Noto Serif Hebrew',serif;
-  font-size:18px;font-weight:900;color:var(--gold2);
-  display:flex;align-items:center;gap:8px;flex:1;min-width:0;
-}
-.overlay-title span{truncate:ellipsis;overflow:hidden;white-space:nowrap;}
-.overlay-close{
-  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
-  color:white;border-radius:10px;padding:6px 14px;cursor:pointer;
-  font-family:'Frank Ruhl Libre',serif;font-size:14px;font-weight:600;
-  transition:background 0.15s;flex-shrink:0;
-}
-.overlay-close:hover{background:rgba(255,255,255,0.2);}
-.daf-nav{
-  display:flex;gap:8px;padding:10px 16px;
-  background:var(--ink2);
-  border-bottom:1px solid rgba(201,162,39,0.3);
-}
-.daf-nav-btn{
-  flex:1;padding:10px;border:1px solid rgba(201,162,39,0.3);
-  border-radius:10px;background:rgba(255,255,255,0.07);
-  color:var(--gold2);font-family:'Frank Ruhl Libre',serif;
-  font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;
-}
-.daf-nav-btn:hover{background:rgba(255,255,255,0.15);}
-.tabs{display:flex;background:white;border-bottom:2px solid var(--parchment3);}
-.tab{
-  flex:1;padding:12px 4px;border:none;background:none;cursor:pointer;
-  font-family:'Frank Ruhl Libre',serif;font-size:13px;font-weight:600;
-  color:#888;transition:all 0.15s;border-bottom:3px solid transparent;margin-bottom:-2px;
-}
-.tab.active{color:var(--ink);border-bottom-color:var(--gold);}
-.tab-content{flex:1;overflow-y:auto;padding:20px 16px;}
-
-/* TEXT DISPLAY */
-.gemara-text{
-  font-family:'Noto Serif Hebrew',serif;
-  font-size:19px;line-height:2.1;color:var(--ink);
-  direction:rtl;
-}
-.gemara-text p{
-  margin-bottom:24px;padding:16px 20px;
-  background:white;border-radius:14px;
-  border:1px solid var(--parchment3);
-  border-right:4px solid var(--gold);
-}
-.gemara-text b{color:var(--ink);font-weight:700;}
-
-/* PORTAL CARD */
-.portal-card{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;padding:32px 24px;gap:20px;text-align:center;
-  flex:1;
-}
-.portal-icon{font-size:48px;margin-bottom:4px;}
-.portal-title{
-  font-family:'Noto Serif Hebrew',serif;
-  font-size:24px;font-weight:900;color:var(--ink);
-}
-.portal-desc{font-size:14px;color:var(--ink3);line-height:1.7;max-width:280px;}
-.portal-btn{
-  display:block;width:100%;padding:14px;text-decoration:none;
-  background:var(--ink);color:var(--gold2);
-  border-radius:14px;font-family:'Noto Serif Hebrew',serif;
-  font-size:17px;font-weight:900;text-align:center;
-  box-shadow:0 4px 16px rgba(26,10,46,0.2);transition:all 0.2s;cursor:pointer;border:none;
-}
-.portal-btn:hover{background:var(--ink2);}
-
-/* NOTES */
-.notes-area{
-  padding:12px 16px;background:#fffbf0;
-  border-top:1px solid #e8d89a;
-  flex-shrink:0;
-}
-.notes-label{font-size:12px;font-weight:700;color:#7a5c00;margin-bottom:6px;text-align:right;}
-.notes-ta{
-  width:100%;min-height:100px;resize:none;
-  background:white;border:1.5px solid #e8d89a;
-  border-radius:10px;padding:10px 14px;
-  font-family:'Frank Ruhl Libre',serif;font-size:15px;
-  color:var(--ink);direction:rtl;outline:none;
-  line-height:1.7;
-}
-.notes-ta:focus{border-color:var(--gold);}
-
-/* LOADER */
-.loader{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:12px;padding:40px;color:var(--ink2);
-}
-.spin{
-  width:36px;height:36px;
-  border:3px solid var(--parchment3);
-  border-top-color:var(--gold);
-  border-radius:50%;animation:spin 0.8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* DATE NAV */
-.date-nav{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:6px 0;
-}
-.date-nav-btn{
-  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
-  border-radius:8px;padding:5px 12px;cursor:pointer;
-  color:rgba(255,255,255,0.7);font-size:16px;transition:all 0.15s;
-}
-.date-nav-btn:hover{background:rgba(255,255,255,0.2);}
-.date-display{text-align:center;color:white;}
-.date-display .hdate{font-family:'Noto Serif Hebrew',serif;font-size:14px;font-weight:700;}
-.date-display .gdate{font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;}
-
-/* SPINNER overlay */
-.full-loader{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:16px;flex:1;
-}
-.full-loader p{font-family:'Noto Serif Hebrew',serif;font-size:18px;color:var(--ink2);font-weight:700;}
-
-/* ERROR */
-.error-box{
-  background:#fff8e6;border:1.5px solid #e8d89a;
-  border-radius:14px;padding:12px 16px;
-  font-size:13px;color:#7a5c00;font-weight:600;line-height:1.6;
-}
-
-/* HISTORY MODAL */
-.hist-modal{position:fixed;inset:0;z-index:300;background:var(--parchment);display:flex;flex-direction:column;animation:slideUp 0.25s ease-out;}
-.hist-header{
-  background:var(--ink);padding:20px;border-bottom:2px solid var(--gold);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.hist-title{font-family:'Noto Serif Hebrew',serif;font-size:20px;font-weight:900;color:var(--gold2);}
-.hist-close{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:10px;padding:6px 14px;cursor:pointer;font-size:14px;font-weight:600;}
-.hist-content{flex:1;overflow-y:auto;padding:20px;}
-
-/* CUSTOM SCROLLBAR */
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--parchment3);border-radius:10px}
-
-/* Toggle row */
-.study-mode-row{
-  display:flex;gap:4px;background:var(--parchment2);
-  border-radius:10px;padding:3px;border:1px solid var(--parchment3);
-}
-.study-mode-btn{
-  flex:1;padding:7px;border:none;cursor:pointer;
-  border-radius:8px;font-family:'Frank Ruhl Libre',serif;
-  font-size:13px;font-weight:600;transition:all 0.15s;
-  background:transparent;color:var(--ink3);
-}
-.study-mode-btn.active{background:white;color:var(--ink);box-shadow:0 1px 6px rgba(26,10,46,0.1);}
-
-.hidden{display:none!important;}
-.fade{animation:fadeIn 0.25s ease-out;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div id="app">
-  <div class="header">
-    <div class="header-top">
-      <div class="logo">בית המדרש <span>הדיגיטלי</span></div>
-      <div id="streakBadge" class="streak-badge">
-        <svg viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14zm0 17a3 3 0 0 1-3-3c0-3 3-4 3-7 0 3 3 4 3 7a3 3 0 0 1-3 3z"/></svg>
-        <span id="streakNum">0</span>
-      </div>
-    </div>
-    <div class="mode-tabs">
-      <button class="mode-tab active" id="tabGemara" onclick="setMaster('gemara')">גמרא</button>
-      <button class="mode-tab" id="tabTanya" onclick="setMaster('tanya')">תניא</button>
-      <button class="mode-tab" id="tabHistory" onclick="showHistory()">📋 היסטוריה</button>
-    </div>
-    <div class="cal-strip">
-      <div class="date-nav">
-        <button class="date-nav-btn" onclick="shiftDate(1)">‹</button>
-        <div class="date-display">
-          <div class="hdate" id="hebDateDisplay">טוען...</div>
-          <div class="gdate" id="gregDateDisplay"></div>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="topbar">
+        <div class="brand"><strong>בית המדרש</strong><span>הלימוד היומי שלך, נקי ומהיר</span></div>
+        <div id="streakBadge" class="streak" title="רצף לימוד">
+          <svg viewBox="0 0 24 24"><path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14zm0 17a3 3 0 0 1-3-3c0-3 3-4 3-7 0 3 3 4 3 7a3 3 0 0 1-3 3z"/></svg>
+          <span id="streakNum">0</span>
         </div>
-        <button class="date-nav-btn" onclick="shiftDate(-1)">›</button>
       </div>
-    </div>
-  </div>
-
-  <div id="calContainer" class="heb-cal">
-    <div class="heb-cal-header">
-      <button class="month-nav" onclick="prevCalMonth()">›</button>
-      <div class="heb-month-title">
-        <span id="calMonthTitle">טוען...</span>
-        <span class="greg-sub" id="calGregSub"></span>
-      </div>
-      <button class="month-nav" onclick="nextCalMonth()">‹</button>
-    </div>
-    <div class="cal-weekdays">
-      <div class="cal-wd">א</div><div class="cal-wd">ב</div><div class="cal-wd">ג</div>
-      <div class="cal-wd">ד</div><div class="cal-wd">ה</div><div class="cal-wd">ו</div>
-      <div class="cal-wd">ש</div>
-    </div>
-    <div class="cal-grid" id="calGrid"></div>
-  </div>
-
-  <div class="main" id="mainContent">
-    <div class="full-loader" id="mainLoader">
-      <div class="spin"></div>
-      <p>טוען לימוד יומי...</p>
-    </div>
-    <div id="mainBody" class="hidden fade">
-      <div id="errorBox" class="error-box hidden"></div>
-      <div class="study-card">
-        <div class="study-card-header">
-          <div class="study-card-label" id="studyCardLabel">דף יומי</div>
-          <div style="display:flex;gap:6px;">
-            <span id="masterBadge" class="study-type-badge badge-gemara">גמרא</span>
-            <span id="modeBadge" class="study-type-badge badge-daily">יומי</span>
+      <nav class="mode-tabs">
+        <button class="mode-tab active" id="tabGemara" onclick="setMaster('gemara')">גמרא</button>
+        <button class="mode-tab" id="tabTanya" onclick="setMaster('tanya')">תניא</button>
+        <button class="mode-tab history" id="tabHistory" onclick="showHistory()">היסטוריה</button>
+      </nav>
+      <section class="today-panel">
+        <div class="date-line">
+          <button class="date-nav-btn" onclick="shiftDate(1)" aria-label="היום הבא">‹</button>
+          <div class="date-center">
+            <div class="hdate" id="hebDateDisplay">טוען...</div>
+            <div class="gdate" id="gregDateDisplay"></div>
           </div>
+          <button class="date-nav-btn" onclick="shiftDate(-1)" aria-label="היום הקודם">›</button>
         </div>
-        <div class="study-card-body">
-          <div class="study-mode-row" style="margin-bottom:14px;">
-            <button class="study-mode-btn active" id="btnDaily" onclick="setMode('daily')">לימוד יומי</button>
-            <button class="study-mode-btn" id="btnCustom" onclick="setMode('custom')">בחירה חופשית</button>
-          </div>
+        <button class="calendar-toggle" onclick="toggleCalendar()" id="calendarToggle">פתח לוח חודשי</button>
+      </section>
+    </header>
 
-          <!-- DAILY VIEW -->
-          <div id="dailyView">
-            <div class="daf-title" id="dailyTitle">-</div>
-            <div class="daf-subtitle" id="dailySubtitle"></div>
-            <button class="learn-btn idle" id="learnBtn" onclick="toggleLearn()">
-              <span id="learnBtnText">סמן כנלמד</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-            </button>
-          </div>
+    <section id="calContainer" class="cal-drawer hidden">
+      <div class="cal-head">
+        <button class="month-nav" onclick="prevCalMonth()">›</button>
+        <div class="cal-title"><div id="calMonthTitle">טוען...</div><span id="calGregSub"></span></div>
+        <button class="month-nav" onclick="nextCalMonth()">‹</button>
+      </div>
+      <div class="cal-weekdays"><div class="cal-wd">א</div><div class="cal-wd">ב</div><div class="cal-wd">ג</div><div class="cal-wd">ד</div><div class="cal-wd">ה</div><div class="cal-wd">ו</div><div class="cal-wd">ש</div></div>
+      <div class="cal-grid" id="calGrid"></div>
+    </section>
 
-          <!-- CUSTOM VIEW -->
-          <div id="customView" class="hidden">
-            <div id="gemaraCustomPicker">
-              <div style="margin-bottom:10px;">
-                <select class="picker-select" id="customTractate" style="width:100%;margin-bottom:8px;"></select>
-              </div>
-              <div class="picker-row">
-                <button class="picker-btn" onclick="moveDaf(-1)">‹</button>
-                <select class="picker-select" id="customDaf"></select>
-                <select class="picker-select" id="customAmud" style="max-width:90px;">
-                  <option value="a">עמוד א'</option>
-                  <option value="b">עמוד ב'</option>
-                </select>
-                <button class="picker-btn" onclick="moveDaf(1)">›</button>
+    <main class="main" id="mainContent">
+      <div class="full-loader" id="mainLoader"><div class="spin"></div><p>טוען לימוד יומי...</p></div>
+      <div id="mainBody" class="hidden fade">
+        <div id="errorBox" class="error-box hidden"></div>
+        <section class="study-card">
+          <div class="study-card-header">
+            <div class="study-card-label" id="studyCardLabel">לימוד היום</div>
+            <div class="badges"><span id="masterBadge" class="badge badge-gemara">גמרא</span><span id="modeBadge" class="badge badge-daily">יומי</span></div>
+          </div>
+          <div class="study-card-body">
+            <div class="study-mode-row">
+              <button class="study-mode-btn active" id="btnDaily" onclick="setMode('daily')">לימוד יומי</button>
+              <button class="study-mode-btn" id="btnCustom" onclick="setMode('custom')">בחירה חופשית</button>
+            </div>
+            <div id="dailyView" class="daily-block">
+              <div class="daily-title" id="dailyTitle">-</div>
+              <div class="daily-subtitle" id="dailySubtitle"></div>
+              <div class="quick-actions">
+                <button class="open-btn" onclick="enterBeitMidrash()">פתח לימוד</button>
+                <button class="learn-btn idle" id="learnBtn" onclick="toggleLearn()"><span id="learnBtnText">סמן כנלמד</span></button>
               </div>
             </div>
-            <div id="tanyaCustomPicker" class="hidden">
-              <div style="margin-bottom:10px;">
-                <select class="picker-select" id="customSection" style="width:100%;margin-bottom:8px;" onchange="onSectionChange()"></select>
+            <div id="customView" class="hidden">
+              <div id="gemaraCustomPicker">
+                <select class="picker-select" id="customTractate" style="margin-bottom:9px"></select>
+                <div class="picker-row">
+                  <button class="picker-btn" onclick="moveDaf(-1)">‹</button>
+                  <select class="picker-select" id="customDaf"></select>
+                  <select class="picker-select" id="customAmud" style="max-width:96px"><option value="a">עמוד א'</option><option value="b">עמוד ב'</option></select>
+                  <button class="picker-btn" onclick="moveDaf(1)">›</button>
+                </div>
               </div>
-              <div class="picker-row">
-                <button class="picker-btn" onclick="moveTanya(-1)">‹</button>
-                <select class="picker-select" id="customChapter"></select>
-                <button class="picker-btn" onclick="moveTanya(1)">›</button>
+              <div id="tanyaCustomPicker" class="hidden">
+                <select class="picker-select" id="customSection" style="margin-bottom:9px" onchange="onSectionChange()"></select>
+                <div class="picker-row"><button class="picker-btn" onclick="moveTanya(-1)">‹</button><select class="picker-select" id="customChapter"></select><button class="picker-btn" onclick="moveTanya(1)">›</button></div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
+        <button class="enter-btn" id="enterBtn" onclick="enterBeitMidrash()">היכנס לבית המדרש</button>
       </div>
-      <button class="enter-btn" id="enterBtn" onclick="enterBeitMidrash()">
-        <span>היכנס לבית המדרש</span>
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 19l-7-7 7-7M18 5v14"/></svg>
-      </button>
-    </div>
+    </main>
   </div>
 </div>
 
-<!-- STUDY OVERLAY -->
 <div class="overlay hidden" id="studyOverlay">
   <div class="overlay-header">
     <div class="overlay-top">
-      <div class="overlay-title">
-        <span>📚</span>
-        <span id="overlayTitle"></span>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button id="notesToggleBtn" onclick="toggleNotes()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:var(--gold2);border-radius:10px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Frank Ruhl Libre',serif;">📝</button>
-        <button class="overlay-close" onclick="closeOverlay()">סגור</button>
-      </div>
+      <div class="overlay-title" id="overlayTitle"></div>
+      <div class="overlay-actions"><button id="notesToggleBtn" class="small-dark notes-btn" onclick="toggleNotes()">הערות</button><button class="small-dark" onclick="closeOverlay()">סגור</button></div>
     </div>
-    <div class="daf-nav" id="dafNav">
-      <button class="daf-nav-btn" onclick="navigateDaf(-1)">‹ עמוד קודם</button>
-      <button class="daf-nav-btn" onclick="navigateDaf(1)">עמוד הבא ›</button>
-    </div>
+    <div class="daf-nav" id="dafNav"><button class="daf-nav-btn" onclick="navigateDaf(-1)">עמוד קודם</button><button class="daf-nav-btn" onclick="navigateDaf(1)">עמוד הבא</button></div>
   </div>
   <div class="tabs" id="overlayTabs"></div>
-  <div id="notesArea" class="notes-area hidden">
-    <div class="notes-label">ההערות שלי</div>
-    <textarea class="notes-ta" id="notesTa" placeholder="כתוב כאן מחשבה, קושיה, חידוש..." oninput="saveNote()"></textarea>
-    <div style="font-size:11px;color:#aaa;text-align:left;margin-top:4px;">נשמר אוטומטית</div>
-  </div>
+  <div id="notesArea" class="notes-area hidden"><div class="notes-label">ההערות שלי</div><textarea class="notes-ta" id="notesTa" placeholder="כתוב כאן מחשבה, קושיה או סיכום קצר..." oninput="saveNote()"></textarea></div>
   <div class="tab-content" id="tabContent"></div>
 </div>
 
-<!-- HISTORY MODAL -->
 <div class="hist-modal hidden" id="histModal">
-  <div class="hist-header">
-    <div class="hist-title">📋 ההיסטוריה שלי</div>
-    <button class="hist-close" onclick="closeHistory()">סגור</button>
-  </div>
+  <div class="hist-header"><div class="hist-top"><div class="hist-title">היסטוריית לימוד</div><button class="small-dark" onclick="closeHistory()">סגור</button></div></div>
   <div class="hist-content" id="histContent"></div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
 // DATA
-// ═══════════════════════════════════════════════
 const TRACTATES=[
   {he:'ברכות',en:'Berakhot',daf:64},{he:'שבת',en:'Shabbat',daf:157},{he:'עירובין',en:'Eruvin',daf:105},
   {he:'פסחים',en:'Pesachim',daf:121},{he:'שקלים',en:'Shekalim',daf:22},{he:'יומא',en:'Yoma',daf:88},
@@ -604,699 +239,341 @@ const TRACTATES=[
   {he:'מעילה',en:'Meilah',daf:22},{he:'תמיד',en:'Tamid',daf:10},{he:'מידות',en:'Middot',daf:4},
   {he:'קינים',en:'Kinnim',daf:3},{he:'נידה',en:'Niddah',daf:73}
 ];
-
 const TANYA_SECTIONS=[
-  {he:'ליקוטי אמרים',en:'Likutei_Amarim',max:53},
-  {he:'שער היחוד והאמונה',en:'Shaar_HaYichud_VeHaEmunah',max:12},
-  {he:'אגרת התשובה',en:'Iggeret_HaTeshuvah',max:12},
-  {he:'אגרת הקודש',en:'Iggeret_HaKodesh',max:32},
-  {he:'קונטרס אחרון',en:'Kuntres_Acharon',max:9}
+  {he:'ליקוטי אמרים',en:'Likutei_Amarim',max:53,sefaria:'Tanya,_Likutei_Amarim'},
+  {he:'שער היחוד והאמונה',en:'Shaar_HaYichud_VeHaEmunah',max:12,sefaria:'Tanya,_Shaar_HaYichud_VeHaEmunah'},
+  {he:'אגרת התשובה',en:'Iggeret_HaTeshuvah',max:12,sefaria:'Tanya,_Iggeret_HaTeshuvah'},
+  {he:'אגרת הקודש',en:'Iggeret_HaKodesh',max:32,sefaria:'Tanya,_Iggeret_HaKodesh'},
+  {he:'קונטרס אחרון',en:'Kuntres_Acharon',max:9,sefaria:'Tanya,_Kuntres_Acharon'}
 ];
+const GREG_MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const DAY_MS=86400000;
+const CACHE_TTL=24*60*60*1000;
+const TRACTATE_ID_STARTS=(()=>{let starts={},current=1;for(const t of TRACTATES){starts[t.en]=current;current+=(t.daf-1)*2}return starts})();
 
-// Correct cumulative daf-yomi page IDs
-// Each tractate starts at 2a. 2a=id_start, 2b=id_start+1, 3a=id_start+2...
-// Berakhot 2a = id 1
-const TRACTATE_ID_STARTS = (()=>{
-  let starts={};
-  let current=1;
-  for(const t of TRACTATES){
-    starts[t.en]=current;
-    // pages: 2a,2b,3a,...,maxDaf*b = (maxDaf-1)*2 pages total
-    current += (t.daf-1)*2;
-  }
-  return starts;
-})();
-
-function getDafYomiId(tractateEn, daf, amud){
-  const start = TRACTATE_ID_STARTS[tractateEn];
-  if(!start || daf<2) return null;
-  // daf 2a = start+0, daf 2b = start+1, daf 3a = start+2 ...
-  return start + (daf-2)*2 + (amud==='b'?1:0);
-}
-
-function getDafYomiUrl(tractateEn, daf, amud){
-  const id = getDafYomiId(tractateEn, daf, amud);
-  if(!id) return 'https://daf-yomi.com/';
-  return `https://daf-yomi.com/DafYomi_Page.aspx?vt=1&id=${id}`;
-}
-
-function parseDafRef(ref){
-  if(!ref) return null;
-  const s = String(ref).replace(/_/g,' ').trim();
-  const m = s.match(/^(.+?)\.(\d+)(a|b)$/i);
-  if(m) return {tractateEn:m[1].replace(/ /g,'_'), daf:parseInt(m[2]), amud:m[3].toLowerCase()};
-  // fallback: "Tractate Name 26a"
-  const m2 = s.match(/^(.+?)\s+(\d+)(a|b)$/i);
-  if(m2) return {tractateEn:m2[1].replace(/ /g,'_'), daf:parseInt(m2[2]), amud:m2[3].toLowerCase()};
-  return null;
-}
-
-function buildRef(tractateEn, daf, amud){ return `${tractateEn}.${daf}${amud}`; }
-
-function getAdjacentRef(ref, dir){
-  const p = parseDafRef(ref);
-  if(!p) return ref;
-  const idx = TRACTATES.findIndex(t=>t.en===p.tractateEn);
-  if(idx<0) return ref;
-  let {tractateEn,daf,amud}=p;
-  const maxDaf = TRACTATES[idx].daf;
-  if(dir>0){
-    if(amud==='a') amud='b';
-    else if(daf<maxDaf){daf++;amud='a';}
-    else if(TRACTATES[idx+1]){tractateEn=TRACTATES[idx+1].en;daf=2;amud='a';}
-  } else {
-    if(amud==='b') amud='a';
-    else if(daf>2){daf--;amud='b';}
-    else if(idx>0){tractateEn=TRACTATES[idx-1].en;daf=TRACTATES[idx-1].daf;amud='b';}
-  }
-  return buildRef(tractateEn,daf,amud);
-}
-
-function toGematria(n){
-  if(!n||n<=0) return '';
-  const U=['','א','ב','ג','ד','ה','ו','ז','ח','ט'];
-  const T=['','י','כ','ל','מ','נ','ס','ע','פ','צ'];
-  const H=['','ק','ר','ש','ת'];
-  const h=Math.floor(n/100),t=Math.floor((n%100)/10),u=n%10;
-  let s=H[h]||'';
-  if(t===1&&u===5) s+='טו';
-  else if(t===1&&u===6) s+='טז';
-  else s+=(T[t]||'')+(U[u]||'');
-  return s;
-}
-
-// ═══════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════
-let masterMode='gemara'; // 'gemara' | 'tanya'
-let studyMode='daily';   // 'daily' | 'custom'
+let masterMode='gemara';
+let studyMode='daily';
 let dateOffset=0;
 let currentGregDate='';
 let currentHebDate='';
 let dailyDafRef='';
 let dailyDafHe='';
 let dailyTanyaHe='';
-
 let customTractateEn=TRACTATES[0].en;
 let customDaf=2;
 let customAmud='a';
 let customSectionEn=TANYA_SECTIONS[0].en;
 let customChapter=1;
-
 let calYear=new Date().getFullYear();
-let calMonth=new Date().getMonth(); // 0-based
-let calData={}; // date->hebDay mapping
+let calMonth=new Date().getMonth();
+let calData={};
 let learnedDates={};
-
 let overlayRef='';
 let overlayMaster='';
 let activeTab='';
+let dynamicGemaraTabs=[];
 
-// ═══════════════════════════════════════════════
-// STORAGE HELPERS
-// ═══════════════════════════════════════════════
-function ls(k,def=''){try{return localStorage.getItem(k)||def;}catch(e){return def;}}
-function lss(k,v){try{localStorage.setItem(k,v);}catch(e){}}
-function getStreak(type){return parseInt(ls(`streak_${type}`,'0'),10)||0;}
-function setStreak(type,n){lss(`streak_${type}`,String(n));}
-function isLearned(dateKey,type){return ls(`learned_${type}_${dateKey}`)===`1`;}
-function setLearned(dateKey,type,v){lss(`learned_${type}_${dateKey}`,v?'1':'0');}
-function getNoteKey(ref){return `note_${ref}`;}
-function getNote(ref){return ls(getNoteKey(ref),'');}
-function saveNoteVal(ref,v){lss(getNoteKey(ref),v);}
+// STORAGE + CACHE
+function ls(k,def=''){try{return localStorage.getItem(k)||def}catch(e){return def}}
+function lss(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function lsr(k){try{localStorage.removeItem(k)}catch(e){}}
+function isLearned(dateKey,type){return ls(`learned_${type}_${dateKey}`)==='1'}
+function setLearned(dateKey,type,v){v?lss(`learned_${type}_${dateKey}`,'1'):lsr(`learned_${type}_${dateKey}`)}
+function getNote(ref){return ls(`note_${ref}`,'')}
+function saveNoteVal(ref,v){lss(`note_${ref}`,v)}
+function cacheKey(url){return 'cache_v2_'+url}
+async function cachedJSON(url,ttl=CACHE_TTL){
+  const key=cacheKey(url);
+  try{const raw=localStorage.getItem(key);if(raw){const obj=JSON.parse(raw);if(Date.now()-obj.t<ttl)return obj.v}}catch(e){}
+  const res=await fetch(url,{headers:{Accept:'application/json'}});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const val=await res.json();
+  try{localStorage.setItem(key,JSON.stringify({t:Date.now(),v:val}))}catch(e){}
+  return val;
+}
+async function cachedText(url,ttl=CACHE_TTL){
+  const key=cacheKey('text_'+url);
+  try{const raw=localStorage.getItem(key);if(raw){const obj=JSON.parse(raw);if(Date.now()-obj.t<ttl)return obj.v}}catch(e){}
+  const res=await fetch(url,{headers:{Accept:'application/json'}});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const val=await res.text();
+  try{localStorage.setItem(key,JSON.stringify({t:Date.now(),v:val}))}catch(e){}
+  return val;
+}
 
-// ═══════════════════════════════════════════════
+// DATE + REF HELPERS
+function dateKeyFromDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function addDaysKey(key,delta){const d=new Date(key+'T00:00:00');d.setDate(d.getDate()+delta);return dateKeyFromDate(d)}
+function todayKey(){const d=new Date();return dateKeyFromDate(d)}
+function calcStreak(type){
+  let anchor=todayKey();
+  if(!isLearned(anchor,type) && isLearned(addDaysKey(anchor,-1),type)) anchor=addDaysKey(anchor,-1);
+  let count=0,cur=anchor;
+  while(isLearned(cur,type)){count++;cur=addDaysKey(cur,-1)}
+  return count;
+}
+function getDafYomiId(tractateEn,daf,amud){const start=TRACTATE_ID_STARTS[tractateEn];if(!start||daf<2)return null;return start+(daf-2)*2+(amud==='b'?1:0)}
+function getDafYomiUrl(tractateEn,daf,amud){const id=getDafYomiId(tractateEn,daf,amud);return id?`https://daf-yomi.com/DafYomi_Page.aspx?vt=1&id=${id}`:'https://daf-yomi.com/'}
+function normalizeDafRef(ref){
+  if(!ref)return '';
+  let s=String(ref).trim()
+    .replace(/^https?:\/\/www\.sefaria\.org\//,'')
+    .replace(/^https?:\/\/sefaria\.org\//,'')
+    .replace(/^\/+/,'')
+    .replace(/\?.*$/,'')
+    .replace(/\//g,'.')
+    .replace(/_/g,' ')
+    .trim();
+  let m=s.match(/^(.+?)[\s.]+(\d+)(a|b)$/i);
+  if(m)return `${m[1].trim().replace(/ /g,'_')}.${parseInt(m[2],10)}${m[3].toLowerCase()}`;
+  m=s.match(/^(.+?)[\s.]+(\d+)$/i);
+  if(m)return `${m[1].trim().replace(/ /g,'_')}.${parseInt(m[2],10)}a`;
+  return s.replace(/ /g,'_');
+}
+function parseDafRef(ref){
+  const s=normalizeDafRef(ref).replace(/_/g,' ');
+  const m=s.match(/^(.+?)\.(\d+)(a|b)$/i);
+  if(!m)return null;
+  return {tractateEn:m[1].replace(/ /g,'_'),daf:parseInt(m[2],10),amud:m[3].toLowerCase()};
+}
+function buildRef(tractateEn,daf,amud){return `${tractateEn}.${daf}${amud}`}
+function getAdjacentRef(ref,dir){const p=parseDafRef(ref);if(!p)return ref;const idx=TRACTATES.findIndex(t=>t.en===p.tractateEn);if(idx<0)return ref;let{tractateEn,daf,amud}=p;const maxDaf=TRACTATES[idx].daf;if(dir>0){if(amud==='a')amud='b';else if(daf<maxDaf){daf++;amud='a'}else if(TRACTATES[idx+1]){tractateEn=TRACTATES[idx+1].en;daf=2;amud='a'}}else{if(amud==='b')amud='a';else if(daf>2){daf--;amud='b'}else if(idx>0){tractateEn=TRACTATES[idx-1].en;daf=TRACTATES[idx-1].daf;amud='b'}}return buildRef(tractateEn,daf,amud)}
+function toGematria(n){if(!n||n<=0)return'';const U=['','א','ב','ג','ד','ה','ו','ז','ח','ט'],T=['','י','כ','ל','מ','נ','ס','ע','פ','צ'],H=['','ק','ר','ש','ת'];const h=Math.floor(n/100),t=Math.floor((n%100)/10),u=n%10;let s=H[h]||'';if(t===1&&u===5)s+='טו';else if(t===1&&u===6)s+='טז';else s+=(T[t]||'')+(U[u]||'');return s}
+function tanyaRef(sectionEn,chapter){const sec=TANYA_SECTIONS.find(s=>s.en===sectionEn)||TANYA_SECTIONS[0];return `${sec.sefaria}.${chapter}`}
+function tanyaUrlForCurrent(){
+  if(studyMode==='daily')return 'https://he.chabad.org/dailystudy/tanya.htm';
+  return `https://www.sefaria.org/${encodeURIComponent(tanyaRef(customSectionEn,customChapter))}?lang=he`;
+}
+function getHebTextArray(data){
+  const candidates=[data && data.he, data && data.text, data && data.heRefText];
+  for(const c of candidates){const arr=Array.isArray(c)?c.flat(Infinity):[c];const out=arr.filter(x=>typeof x==='string'&&x.trim());if(out.length)return out}
+  return [];
+}
+function escapeHTML(s){return String(s).replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]))}
+
 // INIT
-// ═══════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', ()=>{
-  buildTractateSelect();
-  buildDafSelect();
-  buildSectionSelect();
-  buildChapterSelect();
-  loadLearnedDates();
-  fetchDay();
-});
+window.addEventListener('DOMContentLoaded',()=>{buildTractateSelect();buildDafSelect();buildSectionSelect();buildChapterSelect();loadLearnedDates();fetchDay()});
+function loadLearnedDates(){learnedDates={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('learned_')&&localStorage.getItem(k)==='1'){const parts=k.split('_');if(parts.length>=3){const type=parts[1],dateKey=parts.slice(2).join('_');learnedDates[dateKey+':'+type]=true}}}}catch(e){}}
+function buildTractateSelect(){const sel=document.getElementById('customTractate');sel.innerHTML='';TRACTATES.forEach(t=>{const o=document.createElement('option');o.value=t.en;o.textContent=t.he;sel.appendChild(o)});sel.onchange=e=>{customTractateEn=e.target.value;customDaf=2;customAmud='a';buildDafSelect()}}
+function buildDafSelect(){const t=TRACTATES.find(x=>x.en===customTractateEn),max=t?t.daf:64,sel=document.getElementById('customDaf');sel.innerHTML='';for(let i=2;i<=max;i++){const o=document.createElement('option');o.value=i;o.textContent=`דף ${toGematria(i)}`;sel.appendChild(o)}if(customDaf>max)customDaf=2;sel.value=customDaf;sel.onchange=e=>{customDaf=parseInt(e.target.value,10)}}
+function buildSectionSelect(){const sel=document.getElementById('customSection');sel.innerHTML='';TANYA_SECTIONS.forEach(s=>{const o=document.createElement('option');o.value=s.en;o.textContent=s.he;sel.appendChild(o)});sel.onchange=e=>{customSectionEn=e.target.value;customChapter=1;buildChapterSelect()}}
+function buildChapterSelect(){const sec=TANYA_SECTIONS.find(s=>s.en===customSectionEn),max=sec?sec.max:53,sel=document.getElementById('customChapter');sel.innerHTML='';for(let i=1;i<=max;i++){const o=document.createElement('option');o.value=i;o.textContent=`פרק ${toGematria(i)}`;sel.appendChild(o)}if(customChapter>max)customChapter=1;sel.value=customChapter;sel.onchange=e=>{customChapter=parseInt(e.target.value,10)}}
 
-function loadLearnedDates(){
-  try{
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i);
-      if(k&&k.startsWith('learned_')&&localStorage.getItem(k)==='1'){
-        const parts=k.split('_');
-        // format: learned_TYPE_DATEKEY
-        if(parts.length>=3){
-          const type=parts[1];
-          const dateKey=parts.slice(2).join('_');
-          learnedDates[dateKey+':'+type]=true;
-        }
-      }
-    }
-  }catch(e){}
-}
-
-function buildTractateSelect(){
-  const sel=document.getElementById('customTractate');
-  sel.innerHTML='';
-  TRACTATES.forEach(t=>{
-    const o=document.createElement('option');
-    o.value=t.en;o.textContent=t.he;
-    sel.appendChild(o);
-  });
-  sel.addEventListener('change',e=>{customTractateEn=e.target.value;customDaf=2;customAmud='a';buildDafSelect();});
-}
-function buildDafSelect(){
-  const t=TRACTATES.find(x=>x.en===customTractateEn);
-  const max=t?t.daf:64;
-  const sel=document.getElementById('customDaf');
-  const cur=customDaf;
-  sel.innerHTML='';
-  for(let i=2;i<=max;i++){
-    const o=document.createElement('option');
-    o.value=i;o.textContent=`דף ${toGematria(i)}`;
-    sel.appendChild(o);
-  }
-  sel.value=cur<=max?cur:2;
-  sel.addEventListener('change',e=>{customDaf=parseInt(e.target.value);});
-}
-function buildSectionSelect(){
-  const sel=document.getElementById('customSection');
-  sel.innerHTML='';
-  TANYA_SECTIONS.forEach(s=>{
-    const o=document.createElement('option');
-    o.value=s.en;o.textContent=s.he;
-    sel.appendChild(o);
-  });
-  sel.addEventListener('change',e=>{customSectionEn=e.target.value;customChapter=1;buildChapterSelect();});
-}
-function buildChapterSelect(){
-  const sec=TANYA_SECTIONS.find(s=>s.en===customSectionEn);
-  const max=sec?sec.max:53;
-  const sel=document.getElementById('customChapter');
-  sel.innerHTML='';
-  for(let i=1;i<=max;i++){
-    const o=document.createElement('option');
-    o.value=i;o.textContent=`פרק ${toGematria(i)}`;
-    sel.appendChild(o);
-  }
-  sel.value=customChapter<=max?customChapter:1;
-  sel.addEventListener('change',e=>{customChapter=parseInt(e.target.value);});
-}
-
-// ═══════════════════════════════════════════════
-// FETCH DAY
-// ═══════════════════════════════════════════════
+// DAILY LOAD
 async function fetchDay(){
-  show('mainLoader');hide('mainBody');
+  show('mainLoader');hide('mainBody');hide('errorBox');
   const d=new Date();d.setDate(d.getDate()+dateOffset);
   const y=d.getFullYear(),m=d.getMonth()+1,day=d.getDate();
-  currentGregDate=`${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-
-  // Greg display
-  document.getElementById('gregDateDisplay').textContent=d.toLocaleDateString('he-IL');
-
-  // Sefaria calendars
+  currentGregDate=dateKeyFromDate(d);
+  document.getElementById('gregDateDisplay').textContent=d.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  dailyDafRef='';dailyDafHe='';dailyTanyaHe='';
   try{
-    const res=await fetch(`https://www.sefaria.org/api/calendars?year=${y}&month=${m}&day=${day}`);
-    const data=await res.json();
+    const data=await cachedJSON(`https://www.sefaria.org/api/calendars?year=${y}&month=${m}&day=${day}`);
     if(data.calendar_items){
       const dafItem=data.calendar_items.find(c=>c.title&&c.title.en==='Daf Yomi');
       const tanyaItem=data.calendar_items.find(c=>c.title&&c.title.en==='Tanya Yomi');
-      if(dafItem){
-        dailyDafRef=dafItem.url||'';
-        dailyDafHe=dafItem.displayValue&&dafItem.displayValue.he?dafItem.displayValue.he:'';
-      }
-      if(tanyaItem){
-        dailyTanyaHe=tanyaItem.displayValue&&tanyaItem.displayValue.he?`תניא - ${tanyaItem.displayValue.he}`:'תניא יומי';
-      }
+      if(dafItem){dailyDafRef=normalizeDafRef(dafItem.url||dafItem.ref||dafItem.displayValue?.en||'');dailyDafHe=dafItem.displayValue&&dafItem.displayValue.he?dafItem.displayValue.he:(dafItem.ref||'דף יומי')}
+      if(tanyaItem){dailyTanyaHe=tanyaItem.displayValue&&tanyaItem.displayValue.he?`תניא - ${tanyaItem.displayValue.he}`:'תניא יומי'}
     }
-  }catch(e){showError('לא הצלחתי לטעון מהשרת. מציג ברירת מחדל.');}
-
-  // Hebrew date
+  }catch(e){showError('לא הצלחתי לטעון את הלימוד היומי מספריא. אפשר לבחור ידנית ב״בחירה חופשית״.')}
   try{
-    const hres=await fetch(`https://www.hebcal.com/converter?cfg=json&date=${currentGregDate}&g2h=1&strict=1`);
-    const hdata=await hres.json();
-    if(hdata.hebrew){
-      currentHebDate=hdata.hebrew.replace(/[\u0591-\u05C7]/g,'');
-      document.getElementById('hebDateDisplay').textContent=currentHebDate;
-      // Calendar month/year from hebcal
-      if(hdata.hm&&hdata.hy){
-        calYear=y;calMonth=d.getMonth();
-      }
-    }
-  }catch(e){document.getElementById('hebDateDisplay').textContent=d.toLocaleDateString('he-IL');}
-
-  renderUI();
-  renderCalendar();
-  hide('mainLoader');show('mainBody');
-  document.getElementById('mainBody').classList.add('fade');
+    const hdata=await cachedJSON(`https://www.hebcal.com/converter?cfg=json&date=${currentGregDate}&g2h=1&strict=1`);
+    currentHebDate=hdata.hebrew?hdata.hebrew.replace(/[\u0591-\u05C7]/g,''):'';
+    document.getElementById('hebDateDisplay').textContent=currentHebDate||d.toLocaleDateString('he-IL');
+  }catch(e){document.getElementById('hebDateDisplay').textContent=d.toLocaleDateString('he-IL')}
+  calYear=d.getFullYear();calMonth=d.getMonth();renderUI();renderCalendar();hide('mainLoader');show('mainBody');document.getElementById('mainBody').classList.add('fade')
 }
-
 function renderUI(){
-  const type=masterMode==='gemara'?'gemara':'tanya';
-  const dateKey=currentGregDate;
-  const learned=isLearned(dateKey,type);
-  const streak=getStreak(type);
-  document.getElementById('streakNum').textContent=streak;
-
-  // badges
+  const type=masterMode==='gemara'?'gemara':'tanya',learned=isLearned(currentGregDate,type);
+  document.getElementById('streakNum').textContent=calcStreak(type);
   document.getElementById('masterBadge').textContent=masterMode==='gemara'?'גמרא':'תניא';
-  document.getElementById('masterBadge').className='study-type-badge '+(masterMode==='gemara'?'badge-gemara':'badge-tanya');
+  document.getElementById('masterBadge').className='badge '+(masterMode==='gemara'?'badge-gemara':'badge-tanya');
   document.getElementById('modeBadge').textContent=studyMode==='daily'?'יומי':'אישי';
-  document.getElementById('modeBadge').className='study-type-badge '+(studyMode==='daily'?'badge-daily':'badge-custom');
-
+  document.getElementById('modeBadge').className='badge '+(studyMode==='daily'?'badge-daily':'badge-custom');
   if(studyMode==='daily'){
     const title=masterMode==='gemara'?dailyDafHe:dailyTanyaHe;
     document.getElementById('dailyTitle').textContent=title||'אין נתונים';
-    document.getElementById('dailySubtitle').textContent=masterMode==='gemara'&&dailyDafRef?`(${dailyDafRef.replace(/_/g,' ')})`:dateOffset===0?'לימוד היום':'';
+    document.getElementById('dailySubtitle').textContent=masterMode==='gemara'&&dailyDafRef?dailyDafRef.replace(/_/g,' '):'הלימוד נמשך לפי התאריך שבחרת';
   }
-
-  const btn=document.getElementById('learnBtn');
-  const btnTxt=document.getElementById('learnBtnText');
-  if(learned){
-    btn.className='learn-btn done';
-    btnTxt.textContent='למדתי! ✓';
-  } else {
-    btn.className='learn-btn idle';
-    btnTxt.textContent='סמן כנלמד';
-  }
+  const btn=document.getElementById('learnBtn'),txt=document.getElementById('learnBtnText');
+  btn.className='learn-btn '+(learned?'done':'idle');
+  txt.textContent=learned?'נלמד':'סמן כנלמד';
 }
 
-// ═══════════════════════════════════════════════
-// CALENDAR
-// ═══════════════════════════════════════════════
-const HEB_MONTHS_HE=['ניסן','אייר','סיון','תמוז','אב','אלול','תשרי','חשון','כסלו','טבת','שבט','אדר','אדר א׳','אדר ב׳'];
-const GREG_MONTHS_HE=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-
-async function renderCalendar(){
-  const d1=new Date(calYear,calMonth,1);
-  const totalDays=new Date(calYear,calMonth+1,0).getDate();
-  // Day of week for first (0=Sun..6=Sat)
-  let startDow=d1.getDay(); // 0=Sun
-
-  document.getElementById('calGregSub').textContent=`${GREG_MONTHS_HE[calMonth]} ${calYear}`;
-
-  // Build grid cells
-  const grid=document.getElementById('calGrid');
-  grid.innerHTML='';
-
-  // Fetch Hebrew dates for this month if needed
-  const cacheKey=`${calYear}-${calMonth}`;
-  if(!calData[cacheKey]){
-    calData[cacheKey]={};
-    try{
-      // Fetch first, middle and last days to get Hebrew month name
-      const midDate=new Date(calYear,calMonth,15);
-      const ymid=midDate.getFullYear(),mmid=midDate.getMonth()+1,dmid=midDate.getDate();
-      const r=await fetch(`https://www.hebcal.com/converter?cfg=json&date=${ymid}-${String(mmid).padStart(2,'0')}-${String(dmid).padStart(2,'0')}&g2h=1&strict=1`);
-      const j=await r.json();
-      if(j.hm) document.getElementById('calMonthTitle').textContent=`${j.hm} ${j.hy}`;
-      else document.getElementById('calMonthTitle').textContent=`${GREG_MONTHS_HE[calMonth]} ${calYear}`;
-
-      // Batch: fetch a few sample days to map hd
-      const sampleDays=[1,8,15,22,totalDays];
-      const results=await Promise.all(sampleDays.map(async dd=>{
-        const dk=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
-        try{
-          const rr=await fetch(`https://www.hebcal.com/converter?cfg=json&date=${dk}&g2h=1&strict=1`);
-          const jj=await rr.json();
-          return {day:dd,hd:jj.hd,hm:jj.hm};
-        }catch(e){return {day:dd,hd:dd,hm:''};}
-      }));
-      // Build simple approximation for all days
-      results.forEach(r=>{calData[cacheKey][r.day]=r.hd;});
-      // interpolate
-      for(let dd=1;dd<=totalDays;dd++){
-        if(!calData[cacheKey][dd]){
-          // find nearest sample
-          const s=results.reduce((a,b)=>Math.abs(b.day-dd)<Math.abs(a.day-dd)?b:a);
-          calData[cacheKey][dd]=((s.hd||1)+(dd-s.day)+29)%30||30;
-        }
-      }
-    }catch(e){
-      document.getElementById('calMonthTitle').textContent=`${GREG_MONTHS_HE[calMonth]} ${calYear}`;
-      for(let dd=1;dd<=totalDays;dd++) calData[cacheKey][dd]=dd;
-    }
-  }
-
-  // Blank cells for day-of-week alignment
-  for(let i=0;i<startDow;i++){
-    const blank=document.createElement('div');
-    blank.className='cal-cell empty';
-    grid.appendChild(blank);
-  }
-
-  const today=new Date();
-  const todayStr=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-
+// EXACT HEBREW CALENDAR
+async function getHebrewMonthData(year,month){
+  const totalDays=new Date(year,month+1,0).getDate();
+  const cache=`month_${year}_${month}`;
+  if(calData[cache])return calData[cache];
+  const promises=[];
   for(let dd=1;dd<=totalDays;dd++){
-    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
-    const cell=document.createElement('div');
+    const key=`${year}-${String(month+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+    promises.push(cachedJSON(`https://www.hebcal.com/converter?cfg=json&date=${key}&g2h=1&strict=1`).then(j=>({day:dd,hd:j.hd,hm:j.hm,hy:j.hy,hebrew:j.hebrew})).catch(()=>({day:dd,hd:dd,hm:'',hy:''})));
+  }
+  const rows=await Promise.all(promises);
+  const obj={days:{},title:''};
+  rows.forEach(r=>{obj.days[r.day]=r});
+  const first=rows[0],last=rows[rows.length-1],mid=rows[Math.min(14,rows.length-1)];
+  obj.title=first.hm&&last.hm&&first.hm!==last.hm?`${first.hm} / ${last.hm} ${last.hy||first.hy||''}`:`${(mid.hm||first.hm||'').trim()} ${(mid.hy||first.hy||'').toString()}`.trim();
+  calData[cache]=obj;
+  return obj;
+}
+async function renderCalendar(){
+  const d1=new Date(calYear,calMonth,1),totalDays=new Date(calYear,calMonth+1,0).getDate(),startDow=d1.getDay(),grid=document.getElementById('calGrid');
+  document.getElementById('calGregSub').textContent=`${GREG_MONTHS_HE[calMonth]} ${calYear}`;
+  grid.innerHTML='';
+  let monthData={days:{},title:`${GREG_MONTHS_HE[calMonth]} ${calYear}`};
+  try{monthData=await getHebrewMonthData(calYear,calMonth)}catch(e){}
+  document.getElementById('calMonthTitle').textContent=monthData.title||`${GREG_MONTHS_HE[calMonth]} ${calYear}`;
+  for(let i=0;i<startDow;i++){const blank=document.createElement('div');blank.className='cal-cell empty';grid.appendChild(blank)}
+  const todayStr=todayKey();
+  for(let dd=1;dd<=totalDays;dd++){
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(dd).padStart(2,'0')}`,cell=document.createElement('div'),dow=(startDow+dd-1)%7;
     cell.className='cal-cell';
-    const dow=(startDow+dd-1)%7; // 0=Sun,6=Sat
-    if(dow===6) cell.classList.add('shabbat');
-    if(dateStr===todayStr&&dateOffset===0) cell.classList.add('today');
-    else if(dateStr===currentGregDate) cell.classList.add('selected');
-
-    // Check learned for gemara or tanya
-    const gLearned=isLearned(dateStr,'gemara');
-    const tLearned=isLearned(dateStr,'tanya');
-    if(gLearned||tLearned) cell.classList.add('learned');
-
-    const hd=calData[cacheKey]&&calData[cacheKey][dd]?toGematria(calData[cacheKey][dd]):String(dd);
-    cell.innerHTML=`<span class="hday">${hd}</span><span class="gday">${dd}</span>`;
-    cell.onclick=()=>selectCalDay(dateStr,dd);
+    if(dow===6)cell.classList.add('shabbat');
+    if(dateStr===todayStr)cell.classList.add('today');
+    if(dateStr===currentGregDate)cell.classList.add('selected');
+    if(isLearned(dateStr,'gemara')||isLearned(dateStr,'tanya'))cell.classList.add('learned');
+    const h=monthData.days[dd]||{};
+    cell.innerHTML=`<span class="hday">${toGematria(h.hd||dd)}</span><span class="gday">${dd}</span>`;
+    cell.onclick=()=>selectCalDay(dateStr);
     grid.appendChild(cell);
   }
 }
+function toggleCalendar(){const c=document.getElementById('calContainer'),b=document.getElementById('calendarToggle');c.classList.toggle('hidden');b.textContent=c.classList.contains('hidden')?'פתח לוח חודשי':'סגור לוח חודשי'}
+function selectCalDay(dateStr){const today=new Date();today.setHours(0,0,0,0);const target=new Date(dateStr+'T00:00:00');target.setHours(0,0,0,0);dateOffset=Math.round((target-today)/DAY_MS);fetchDay()}
+function prevCalMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--}renderCalendar()}
+function nextCalMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCalendar()}
+function shiftDate(dir){dateOffset+=dir;fetchDay()}
 
-function selectCalDay(dateStr, day){
-  // Calculate offset from today
-  const today=new Date();today.setHours(0,0,0,0);
-  const target=new Date(dateStr);target.setHours(0,0,0,0);
-  dateOffset=Math.round((target-today)/(1000*60*60*24));
-  fetchDay();
-}
-
-function prevCalMonth(){
-  calMonth--;if(calMonth<0){calMonth=11;calYear--;}
-  renderCalendar();
-}
-function nextCalMonth(){
-  calMonth++;if(calMonth>11){calMonth=0;calYear++;}
-  renderCalendar();
-}
-
-// ═══════════════════════════════════════════════
 // CONTROLS
-// ═══════════════════════════════════════════════
-function shiftDate(dir){
-  dateOffset+=dir;
-  fetchDay();
-}
-
-function setMaster(m){
-  masterMode=m;
-  document.getElementById('tabGemara').classList.toggle('active',m==='gemara');
-  document.getElementById('tabTanya').classList.toggle('active',m==='tanya');
-  // show/hide pickers
-  document.getElementById('gemaraCustomPicker').classList.toggle('hidden',m!=='gemara');
-  document.getElementById('tanyaCustomPicker').classList.toggle('hidden',m!=='tanya');
-  renderUI();
-}
-
-function setMode(m){
-  studyMode=m;
-  document.getElementById('btnDaily').classList.toggle('active',m==='daily');
-  document.getElementById('btnCustom').classList.toggle('active',m==='custom');
-  document.getElementById('dailyView').classList.toggle('hidden',m!=='daily');
-  document.getElementById('customView').classList.toggle('hidden',m!=='custom');
-  renderUI();
-}
-
-function moveDaf(dir){
-  if(dir>0){
-    if(customAmud==='a') customAmud='b';
-    else if(customDaf<(TRACTATES.find(t=>t.en===customTractateEn)||{daf:64}).daf){customDaf++;customAmud='a';}
-  } else {
-    if(customAmud==='b') customAmud='a';
-    else if(customDaf>2){customDaf--;customAmud='b';}
-  }
-  buildDafSelect();
-  document.getElementById('customDaf').value=customDaf;
-  document.getElementById('customAmud').value=customAmud;
-}
-function moveTanya(dir){
-  const max=(TANYA_SECTIONS.find(s=>s.en===customSectionEn)||{max:53}).max;
-  if(dir>0&&customChapter<max) customChapter++;
-  else if(dir<0&&customChapter>1) customChapter--;
-  document.getElementById('customChapter').value=customChapter;
-}
-function onSectionChange(){
-  customSectionEn=document.getElementById('customSection').value;
-  customChapter=1;
-  buildChapterSelect();
-}
-
+function setMaster(m){masterMode=m;document.getElementById('tabGemara').classList.toggle('active',m==='gemara');document.getElementById('tabTanya').classList.toggle('active',m==='tanya');document.getElementById('gemaraCustomPicker').classList.toggle('hidden',m!=='gemara');document.getElementById('tanyaCustomPicker').classList.toggle('hidden',m!=='tanya');renderUI()}
+function setMode(m){studyMode=m;document.getElementById('btnDaily').classList.toggle('active',m==='daily');document.getElementById('btnCustom').classList.toggle('active',m==='custom');document.getElementById('dailyView').classList.toggle('hidden',m!=='daily');document.getElementById('customView').classList.toggle('hidden',m!=='custom');renderUI()}
+function moveDaf(dir){const max=(TRACTATES.find(t=>t.en===customTractateEn)||{daf:64}).daf;if(dir>0){if(customAmud==='a')customAmud='b';else if(customDaf<max){customDaf++;customAmud='a'}}else{if(customAmud==='b')customAmud='a';else if(customDaf>2){customDaf--;customAmud='b'}}buildDafSelect();document.getElementById('customDaf').value=customDaf;document.getElementById('customAmud').value=customAmud}
+function moveTanya(dir){const max=(TANYA_SECTIONS.find(s=>s.en===customSectionEn)||{max:53}).max;if(dir>0&&customChapter<max)customChapter++;else if(dir<0&&customChapter>1)customChapter--;document.getElementById('customChapter').value=customChapter}
+function onSectionChange(){customSectionEn=document.getElementById('customSection').value;customChapter=1;buildChapterSelect()}
 function toggleLearn(){
-  const type=masterMode==='gemara'?'gemara':'tanya';
-  const dateKey=currentGregDate;
-  const was=isLearned(dateKey,type);
-  const now=!was;
-  setLearned(dateKey,type,now);
-  const oldStreak=getStreak(type);
-  setStreak(type,now?oldStreak+1:Math.max(0,oldStreak-1));
-  if(now) learnedDates[dateKey+':'+type]=true;
-  else delete learnedDates[dateKey+':'+type];
-  renderUI();
-  renderCalendar();
+  const type=masterMode==='gemara'?'gemara':'tanya',was=isLearned(currentGregDate,type),now=!was;
+  setLearned(currentGregDate,type,now);
+  if(now)learnedDates[currentGregDate+':'+type]=true;else delete learnedDates[currentGregDate+':'+type];
+  renderUI();renderCalendar();
 }
 
-// ═══════════════════════════════════════════════
-// BEIT MIDRASH ENTRY
-// ═══════════════════════════════════════════════
+// ENTRY
 function getCurrentRef(){
   if(masterMode==='gemara'){
-    if(studyMode==='daily'){
-      if(!dailyDafRef) return null;
-      // Clean up the ref from Sefaria URL format
-      return dailyDafRef.replace(/^\/+/,'').replace(/\//g,'.');
-    }
-    const t=document.getElementById('customTractate').value||customTractateEn;
-    const d=parseInt(document.getElementById('customDaf').value)||customDaf;
-    const a=document.getElementById('customAmud').value||customAmud;
+    if(studyMode==='daily')return dailyDafRef?normalizeDafRef(dailyDafRef):null;
+    const t=document.getElementById('customTractate').value||customTractateEn,d=parseInt(document.getElementById('customDaf').value,10)||customDaf,a=document.getElementById('customAmud').value||customAmud;
     return buildRef(t,d,a);
-  } else {
-    if(studyMode==='daily') return 'tanya_daily';
-    const sec=document.getElementById('customSection').value||customSectionEn;
-    const ch=parseInt(document.getElementById('customChapter').value)||customChapter;
-    return `tanya_${sec}_${ch}`;
   }
+  if(studyMode==='daily')return 'tanya_daily';
+  const sec=document.getElementById('customSection').value||customSectionEn,ch=parseInt(document.getElementById('customChapter').value,10)||customChapter;
+  return `tanya_${sec}_${ch}`;
 }
-
 function getCurrentTitle(){
   if(masterMode==='gemara'){
-    if(studyMode==='daily') return dailyDafHe||dailyDafRef;
-    const t=TRACTATES.find(x=>x.en===(document.getElementById('customTractate').value||customTractateEn));
-    const d=parseInt(document.getElementById('customDaf').value)||customDaf;
-    const a=document.getElementById('customAmud').value||customAmud;
+    if(studyMode==='daily')return dailyDafHe||dailyDafRef;
+    const t=TRACTATES.find(x=>x.en===(document.getElementById('customTractate').value||customTractateEn)),d=parseInt(document.getElementById('customDaf').value,10)||customDaf,a=document.getElementById('customAmud').value||customAmud;
     return `${t?t.he:''} דף ${toGematria(d)} ע${a==='a'?'א':'ב'}`;
   }
-  if(studyMode==='daily') return dailyTanyaHe||'תניא יומי';
-  const sec=TANYA_SECTIONS.find(s=>s.en===(document.getElementById('customSection').value||customSectionEn));
-  const ch=parseInt(document.getElementById('customChapter').value)||customChapter;
+  if(studyMode==='daily')return dailyTanyaHe||'תניא יומי';
+  const sec=TANYA_SECTIONS.find(s=>s.en===(document.getElementById('customSection').value||customSectionEn)),ch=parseInt(document.getElementById('customChapter').value,10)||customChapter;
   return `תניא - ${sec?sec.he:''} פרק ${toGematria(ch)}`;
 }
+function enterBeitMidrash(){const ref=getCurrentRef();if(!ref){showError('לא נמצא דף יומי לתאריך הזה. נסה בחירה חופשית.');return}overlayRef=ref;overlayMaster=masterMode;document.getElementById('overlayTitle').textContent=getCurrentTitle();document.getElementById('dafNav').classList.toggle('hidden',masterMode!=='gemara');buildTabs();show('studyOverlay')}
+function closeOverlay(){hide('studyOverlay')}
 
-function enterBeitMidrash(){
-  const ref=getCurrentRef();
-  if(!ref) return;
-  overlayRef=ref;
-  overlayMaster=masterMode;
-  document.getElementById('overlayTitle').textContent=getCurrentTitle();
-  document.getElementById('dafNav').classList.toggle('hidden',masterMode!=='gemara');
-  buildTabs();
-  show('studyOverlay');
+// DYNAMIC TABS + TEXT
+const BASE_GEMARA_TABS=[{id:'scan',label:'צורת הדף',kind:'scan'},{id:'gemara',label:'גמרא',kind:'text',urlRef:null}];
+const TABS_TANYA=[{id:'tanya_orig',label:'תניא'},{id:'tanya_explain',label:'ביאור'}];
+function commentatorLabel(source){
+  const s=(source||'').replace(/_/g,' ');
+  if(/Rashi/i.test(s))return 'רש״י';
+  if(/Tosafot|Tosafos/i.test(s))return 'תוספות';
+  if(/Steinsaltz|William Davidson|Koren/i.test(s))return 'ביאור';
+  if(/Maharsha/i.test(s))return 'מהרש״א';
+  return s.split(' on ')[0].replace('Talmud Bavli','').trim()||'מפרש';
 }
-
-function closeOverlay(){hide('studyOverlay');}
-
-// ═══════════════════════════════════════════════
-// TABS & TEXT
-// ═══════════════════════════════════════════════
-const TABS_GEMARA=[
-  {id:'scan',label:'צורת הדף'},
-  {id:'gemara',label:'גמרא'},
-  {id:'explanation',label:'ביאור'},
-  {id:'rashi',label:'רש"י'},
-  {id:'tosafot',label:'תוספות'}
-];
-const TABS_TANYA=[
-  {id:'tanya_orig',label:'תניא'},
-  {id:'tanya_explain',label:'ביאור'}
-];
-
-function buildTabs(){
-  const tabs=overlayMaster==='gemara'?TABS_GEMARA:TABS_TANYA;
+async function discoverGemaraTabs(ref){
+  const tabs=[...BASE_GEMARA_TABS];
+  try{
+    const links=await cachedJSON(`https://www.sefaria.org/api/links/${encodeURIComponent(ref)}?with_text=0`,CACHE_TTL);
+    const seen=new Set();
+    (Array.isArray(links)?links:[]).forEach((l,idx)=>{
+      const source=l.collectiveTitle&&l.collectiveTitle.en?l.collectiveTitle.en:(l.category||l.type||l.sourceRef||'');
+      const label=commentatorLabel(source||l.sourceRef||l.ref);
+      const linkRef=l.sourceRef||l.ref||l.anchorRef||'';
+      const low=label.toLowerCase();
+      if(!linkRef||seen.has(label))return;
+      if(label==='גמרא'||low.includes('talmud'))return;
+      const wanted=['רש״י','תוספות','ביאור','מהרש״א'];
+      if(!wanted.includes(label) && tabs.length>=6)return;
+      seen.add(label);
+      tabs.push({id:'link_'+idx,label,kind:'link',urlRef:linkRef});
+    });
+  }catch(e){
+    tabs.push({id:'rashi_fallback',label:'רש״י',kind:'fallback',prefix:'Rashi_on_'});
+    tabs.push({id:'tosafot_fallback',label:'תוספות',kind:'fallback',prefix:'Tosafot_on_'});
+  }
+  return tabs;
+}
+async function buildTabs(){
   const container=document.getElementById('overlayTabs');
+  container.innerHTML='<button class="tab active">טוען...</button>';
+  const tabs=overlayMaster==='gemara'?await discoverGemaraTabs(normalizeDafRef(overlayRef)):TABS_TANYA;
+  dynamicGemaraTabs=tabs;
   container.innerHTML='';
-  tabs.forEach((t,i)=>{
-    const btn=document.createElement('button');
-    btn.className='tab'+(i===0?' active':'');
-    btn.textContent=t.label;
-    btn.id='tab_'+t.id;
-    btn.onclick=()=>switchTab(t.id);
-    container.appendChild(btn);
-  });
+  tabs.forEach((t,i)=>{const btn=document.createElement('button');btn.className='tab'+(i===0?' active':'');btn.textContent=t.label;btn.id='tab_'+t.id;btn.onclick=()=>switchTab(t.id);container.appendChild(btn)});
   activeTab=tabs[0].id;
   loadTab(activeTab);
-  // notes
-  const noteKey=getNoteKey(overlayRef);
   document.getElementById('notesTa').value=getNote(overlayRef);
 }
-
-function switchTab(tabId){
-  activeTab=tabId;
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  const btn=document.getElementById('tab_'+tabId);
-  if(btn) btn.classList.add('active');
-  loadTab(tabId);
-}
-
+function switchTab(tabId){activeTab=tabId;document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));const btn=document.getElementById('tab_'+tabId);if(btn)btn.classList.add('active');loadTab(tabId)}
 async function loadTab(tabId){
   const content=document.getElementById('tabContent');
-  if(tabId==='scan'){
-    const parsed=parseDafRef(overlayRef);
-    let url='https://daf-yomi.com/';
-    if(parsed){
-      url=getDafYomiUrl(parsed.tractateEn,parsed.daf,parsed.amud);
-    }
-    content.innerHTML=`<div class="portal-card">
-      <div class="portal-icon">📄</div>
-      <div class="portal-title">צורת הדף</div>
-      <div class="portal-desc">לצפייה בצורת הדף בפורטל הדף היומי עם כל הפרשנים</div>
-      <a href="${url}" target="_blank" rel="noopener" class="portal-btn">פתח פורטל הדף היומי</a>
-    </div>`;
-    return;
-  }
-  if(tabId==='tanya_orig'||tabId==='tanya_explain'){
-    content.innerHTML=`<div class="portal-card">
-      <div class="portal-icon">📘</div>
-      <div class="portal-title">תניא יומי</div>
-      <div class="portal-desc">הטקסט והביאור נפתחים ישירות באתר חב"ד עם כל הכלים</div>
-      <a href="https://he.chabad.org/dailystudy/tanya.htm" target="_blank" rel="noopener" class="portal-btn">פתח תניא באתר חב"ד</a>
-    </div>`;
-    return;
-  }
-  // Text tabs
-  content.innerHTML=`<div class="loader"><div class="spin"></div><p style="font-family:'Frank Ruhl Libre',serif;color:var(--ink3);">טוען...</p></div>`;
-  const url=buildTextUrl(tabId,overlayRef);
-  if(!url){content.innerHTML=`<div class="portal-card"><div class="portal-desc">אין תוכן להצגה בלשונית זו.</div></div>`;return;}
+  if(overlayMaster==='tanya')return loadTanyaTab(tabId,content);
+  const tab=(dynamicGemaraTabs||[]).find(t=>t.id===tabId)||BASE_GEMARA_TABS[0];
+  if(tab.kind==='scan')return loadScan(content);
+  content.innerHTML='<div class="loader"><div class="spin"></div><p>טוען...</p></div>';
+  const ref=normalizeDafRef(tab.kind==='link'?tab.urlRef:overlayRef);
+  const apiRef=tab.kind==='fallback'?`${tab.prefix}${normalizeDafRef(overlayRef)}`:ref;
   try{
-    const res=await fetch(url,{headers:{Accept:'application/json'}});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const txt=await res.text();
-    if(!txt.trim()||txt.trim().startsWith('<')) throw new Error('לא JSON');
-    const data=JSON.parse(txt);
-    const arr=Array.isArray(data.he)?data.he.flat(Infinity):[data.he];
-    const paragraphs=arr.filter(p=>typeof p==='string'&&p.trim());
-    if(!paragraphs.length) throw new Error('אין תוכן');
+    const txt=await cachedText(`https://www.sefaria.org/api/texts/${encodeURIComponent(apiRef)}`);
+    if(!txt.trim()||txt.trim().startsWith('<'))throw new Error('לא התקבל JSON');
+    const data=JSON.parse(txt),paragraphs=getHebTextArray(data);
+    if(!paragraphs.length)throw new Error('אין תוכן');
     content.innerHTML=`<div class="gemara-text" dir="rtl">${paragraphs.map(p=>`<p>${p}</p>`).join('')}</div>`;
   }catch(e){
-    // Try fallback URLs
-    const fallbacks=buildFallbackUrls(tabId,overlayRef);
-    let found=false;
-    for(const fu of fallbacks){
-      try{
-        const r=await fetch(fu,{headers:{Accept:'application/json'}});
-        if(!r.ok) continue;
-        const t=await r.text();
-        if(!t.trim()||t.trim().startsWith('<')) continue;
-        const d=JSON.parse(t);
-        const a=Array.isArray(d.he)?d.he.flat(Infinity):[d.he];
-        const p=a.filter(x=>typeof x==='string'&&x.trim());
-        if(p.length){
-          content.innerHTML=`<div class="gemara-text" dir="rtl">${p.map(x=>`<p>${x}</p>`).join('')}</div>`;
-          found=true;break;
-        }
-      }catch(ee){}
-    }
-    if(!found){
-      content.innerHTML=`<div class="portal-card">
-        <div class="portal-icon">🔍</div>
-        <div class="portal-title">לא נמצא תוכן</div>
-        <div class="portal-desc">${e.message||'לא הצלחתי לטעון תוכן לדף הזה ממאגר ספריא'}</div>
-        <a href="https://www.sefaria.org/${encodeURIComponent(overlayRef)}" target="_blank" rel="noopener" class="portal-btn">פתח בספריא ישירות</a>
-      </div>`;
-    }
+    content.innerHTML=`<div class="portal-card"><div class="portal-box"><div class="portal-mark">ס</div><div class="portal-title">אין טקסט זמין בתוך האפליקציה</div><div class="portal-desc">הלשוניות נבנות כעת לפי הקישורים הקיימים בספריא. אם הטקסט עצמו לא נשלף בדפדפן, פותחים ישירות במקור.</div><a href="https://www.sefaria.org/${encodeURIComponent(apiRef)}?lang=he" target="_blank" rel="noopener" class="portal-btn">פתח בספריא</a></div></div>`;
   }
 }
-
-function buildTextUrl(tabId,ref){
-  const clean=ref.replace(/\//g,'.');
-  const enc=encodeURIComponent(clean);
-  if(tabId==='gemara') return `https://www.sefaria.org/api/texts/${enc}`;
-  if(tabId==='explanation') return `https://www.sefaria.org/api/texts/Steinsaltz_on_${enc}`;
-  if(tabId==='rashi') return `https://www.sefaria.org/api/texts/Rashi_on_${enc}`;
-  if(tabId==='tosafot') return `https://www.sefaria.org/api/texts/Tosafot_on_${enc}`;
-  return '';
+function loadScan(content){
+  const parsed=parseDafRef(overlayRef),dafUrl=parsed?getDafYomiUrl(parsed.tractateEn,parsed.daf,parsed.amud):'https://daf-yomi.com/',sefariaUrl=`https://www.sefaria.org/${encodeURIComponent(normalizeDafRef(overlayRef))}?lang=he`;
+  content.innerHTML=`<div class="portal-card"><div class="portal-box"><div class="portal-mark">דף</div><div class="portal-title">צורת הדף של הלימוד הנבחר</div><div class="portal-desc">פתיחה ישירה לדף ולעמוד שנבחרו, בלי לנסות להציג אתר חיצוני בתוך האפליקציה.</div><a href="${dafUrl}" target="_blank" rel="noopener" class="portal-btn">פתח צורת הדף</a><a href="${sefariaUrl}" target="_blank" rel="noopener" class="portal-btn portal-secondary">פתח בספריא</a></div></div>`;
 }
-
-function buildFallbackUrls(tabId,ref){
-  if(tabId!=='tosafot') return [];
-  const clean=ref.replace(/\//g,'.');
-  const noAmud=clean.replace(/\.[0-9]+(a|b)$/,'');
-  return [
-    `https://www.sefaria.org/api/texts/Tosafot_on_${encodeURIComponent(noAmud)}`,
-    `https://www.sefaria.org/api/texts/Tosafot%20on%20${encodeURIComponent(clean.replace('.',' '))}`,
-  ];
-}
-
-function navigateDaf(dir){
-  if(overlayMaster!=='gemara') return;
-  overlayRef=getAdjacentRef(overlayRef,dir);
-  const parsed=parseDafRef(overlayRef);
-  if(parsed){
-    const t=TRACTATES.find(x=>x.en===parsed.tractateEn);
-    document.getElementById('overlayTitle').textContent=`${t?t.he:parsed.tractateEn} דף ${toGematria(parsed.daf)} ע${parsed.amud==='a'?'א':'ב'}`;
+async function loadTanyaTab(tabId,content){
+  const isDaily=overlayRef==='tanya_daily';
+  const ref=isDaily?null:tanyaRef(customSectionEn,customChapter);
+  if(tabId==='tanya_orig' && ref){
+    content.innerHTML='<div class="loader"><div class="spin"></div><p>טוען...</p></div>';
+    try{const txt=await cachedText(`https://www.sefaria.org/api/texts/${encodeURIComponent(ref)}`);const data=JSON.parse(txt),paragraphs=getHebTextArray(data);if(!paragraphs.length)throw new Error('אין תוכן');content.innerHTML=`<div class="gemara-text" dir="rtl">${paragraphs.map(p=>`<p>${p}</p>`).join('')}</div>`;return}catch(e){}
   }
-  loadTab(activeTab);
+  const url=isDaily?'https://he.chabad.org/dailystudy/tanya.htm':`https://www.sefaria.org/${encodeURIComponent(ref)}?lang=he`;
+  const title=isDaily?'תניא יומי':'תניא לפי הפרק הנבחר';
+  const desc=isDaily?'פתח את הלימוד היומי המלא באתר חב״ד.':'הקישור נפתח לפרק שבחרת, ולא לדף היומי הכללי.';
+  content.innerHTML=`<div class="portal-card"><div class="portal-box"><div class="portal-mark">ת</div><div class="portal-title">${title}</div><div class="portal-desc">${desc}</div><a href="${url}" target="_blank" rel="noopener" class="portal-btn">פתח מקור</a></div></div>`;
 }
+function navigateDaf(dir){if(overlayMaster!=='gemara')return;overlayRef=getAdjacentRef(overlayRef,dir);const parsed=parseDafRef(overlayRef);if(parsed){const t=TRACTATES.find(x=>x.en===parsed.tractateEn);document.getElementById('overlayTitle').textContent=`${t?t.he:parsed.tractateEn} דף ${toGematria(parsed.daf)} ע${parsed.amud==='a'?'א':'ב'}`}buildTabs()}
+function toggleNotes(){document.getElementById('notesArea').classList.toggle('hidden')}
+function saveNote(){saveNoteVal(overlayRef,document.getElementById('notesTa').value)}
 
-function toggleNotes(){
-  const area=document.getElementById('notesArea');
-  area.classList.toggle('hidden');
-}
-
-function saveNote(){
-  const v=document.getElementById('notesTa').value;
-  saveNoteVal(overlayRef,v);
-}
-
-// ═══════════════════════════════════════════════
 // HISTORY
-// ═══════════════════════════════════════════════
-function showHistory(){
-  const container=document.getElementById('histContent');
-  const entries=[];
-  try{
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i);
-      if(k&&k.startsWith('learned_')&&localStorage.getItem(k)==='1'){
-        const parts=k.split('_');
-        if(parts.length>=3){
-          const type=parts[1];
-          const dateKey=parts.slice(2).join('_');
-          entries.push({type,dateKey});
-        }
-      }
-    }
-  }catch(e){}
-
-  entries.sort((a,b)=>b.dateKey.localeCompare(a.dateKey));
-
-  if(!entries.length){
-    container.innerHTML=`<div style="text-align:center;color:var(--ink3);padding:40px;font-family:'Noto Serif Hebrew',serif;font-size:18px;">עדיין לא סימנת לימודים</div>`;
-  } else {
-    container.innerHTML=entries.map(e=>`
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:white;border-radius:12px;margin-bottom:8px;border:1px solid var(--parchment3);">
-        <span style="font-family:'Noto Serif Hebrew',serif;font-size:15px;font-weight:700;">${e.dateKey}</span>
-        <span style="background:${e.type==='gemara'?'rgba(26,58,124,0.1)':'rgba(26,92,58,0.1)'};color:${e.type==='gemara'?'var(--blue)':'var(--green)'};padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;">${e.type==='gemara'?'גמרא':'תניא'} ✓</span>
-      </div>
-    `).join('');
-  }
-  show('histModal');
-}
-function closeHistory(){hide('histModal');}
-
-// ═══════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════
-function show(id){document.getElementById(id).classList.remove('hidden');}
-function hide(id){document.getElementById(id).classList.add('hidden');}
-function showError(msg){
-  const b=document.getElementById('errorBox');
-  b.textContent=msg;b.classList.remove('hidden');
-}
+function showHistory(){const container=document.getElementById('histContent'),entries=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('learned_')&&localStorage.getItem(k)==='1'){const parts=k.split('_');if(parts.length>=3)entries.push({type:parts[1],dateKey:parts.slice(2).join('_')})}}}catch(e){}entries.sort((a,b)=>b.dateKey.localeCompare(a.dateKey));if(!entries.length){container.innerHTML='<div style="text-align:center;color:var(--ink3);padding:40px;font-family:\'Noto Serif Hebrew\';font-size:18px;font-weight:900">עדיין לא סימנת לימודים</div>'}else{container.innerHTML=entries.map(e=>`<div class="hist-row"><strong>${e.dateKey}</strong><span class="${e.type==='gemara'?'hist-g':'hist-t'}">${e.type==='gemara'?'גמרא':'תניא'} ✓</span></div>`).join('')}show('histModal')}
+function closeHistory(){hide('histModal')}
+function show(id){document.getElementById(id).classList.remove('hidden')}
+function hide(id){document.getElementById(id).classList.add('hidden')}
+function showError(msg){const b=document.getElementById('errorBox');b.textContent=msg;b.classList.remove('hidden')}
 </script>
 </body>
 </html>
