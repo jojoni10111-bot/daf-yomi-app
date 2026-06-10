@@ -328,24 +328,22 @@ function calcStreak(type){
   while(isLearned(cur,type)){count++;cur=addDaysKey(cur,-1)}
   return count;
 }
-function getDafYomiPageId(tractateEn,daf){
+/* daf-yomi.com uses massechet + amud params.
+   massechet id = 283 + tractate index (sequential by Shas order, verified: Berakhot=283, Shabbat=284, Eruvin=285, Pesachim=286, Chullin=313).
+   amud = running page count within the masechet: daf 2a -> 3, 2b -> 4, i.e. (daf-1)*2 + (amud==='b'?2:1). */
+function getDafYomiMassechet(tractateEn){
   const idx=TRACTATES.findIndex(t=>t.en===tractateEn);
-  if(idx<0||daf<2)return null;
-  let start=1;
-  for(let i=0;i<idx;i++)start+=(TRACTATES[i].daf-1);
-  return start+(daf-2);
+  if(idx<0)return null;
+  return 283+idx;
 }
-/* Amud-level ID for daf-yomi.com image pages */
-function getDafYomiAmudId(tractateEn,daf,amud){
-  const idx=TRACTATES.findIndex(t=>t.en===tractateEn);
-  if(idx<0||daf<2)return null;
-  let start=1;
-  for(let i=0;i<idx;i++)start+=(TRACTATES[i].daf-1)*2;
-  return start+(daf-2)*2+(amud==='b'?1:0);
+function getDafYomiAmud(daf,amud){
+  if(daf<2)return null;
+  return (daf-1)*2+(amud==='b'?2:1);
 }
 function getDafYomiPortalUrl(tractateEn,daf,amud){
-  const id=getDafYomiAmudId(tractateEn,daf,amud);
-  return id?`https://daf-yomi.com/Dafyomi_Page.aspx?id=${id}`:'https://daf-yomi.com/';
+  const m=getDafYomiMassechet(tractateEn);
+  const a=getDafYomiAmud(daf,amud);
+  return (m&&a)?`https://daf-yomi.com/Dafyomi_Page.aspx?vt=1&massechet=${m}&amud=${a}&fs=0`:'https://daf-yomi.com/';
 }
 function normalizeDafRef(ref){
   if(!ref)return'';
